@@ -63,7 +63,6 @@ export default function LandingPage() {
                 >
                   Registrarse
                 </a>
-                <ThemeToggle />
               </div>
             </div>
             <div class="relative w-full aspect-square max-w-md mx-auto md:max-w-none">
