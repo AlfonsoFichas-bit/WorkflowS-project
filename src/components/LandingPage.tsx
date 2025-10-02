@@ -21,7 +21,7 @@ export default function LandingPage() {
             </a>
           </nav>
           <div class="flex items-center gap-2">
-            <ThemeToggle />
+            {/* ThemeToggle removed from header */}
             <a
               class="px-4 py-2 rounded-lg text-sm font-bold bg-primary/10 dark:bg-primary/20 text-primary hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors"
               href="#"
@@ -63,6 +63,7 @@ export default function LandingPage() {
                 >
                   Registrarse
                 </a>
+                <ThemeToggle />
               </div>
             </div>
             <div class="relative w-full aspect-square max-w-md mx-auto md:max-w-none">
@@ -239,6 +240,9 @@ export default function LandingPage() {
               </svg>
             </a>
           </span>
+        </div>
+        <div class="fixed bottom-6 right-6 z-100">
+          <ThemeToggle />
         </div>
       </footer>
     </div>

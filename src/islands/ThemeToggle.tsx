@@ -3,10 +3,10 @@ import { useEffect } from "preact/hooks";
 
 
 const SunIcon = () => (
-  <span class="material-symbols-outlined text-primary">light_mode</span>
+  <span class="material-symbols-outlined text-primary text-2xl">light_mode</span>
 );
 const MoonIcon = () => (
-  <span class="material-symbols-outlined text-primary">dark_mode</span>
+  <span class="material-symbols-outlined text-primary text-2xl">dark_mode</span>
 );
 
 export default function ThemeToggle() {
@@ -33,7 +33,7 @@ export default function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      class="p-2 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
+      class="w-14 h-14 rounded-full shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:shadow-xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center"
       aria-label="Toggle dark mode"
     >
       {isDark.value ? <SunIcon /> : <MoonIcon />}
