@@ -1,4 +1,4 @@
-import { define } from "../../utils.ts";
+import { define } from "../../lib/utils.ts";
 
 export const handler = define.handlers({
   GET(ctx) {

@@ -1,9 +1,10 @@
 import { useSignal } from "@preact/signals";
 import { useEffect } from "preact/hooks";
 
-
 const SunIcon = () => (
-  <span class="material-symbols-outlined text-primary text-2xl">light_mode</span>
+  <span class="material-symbols-outlined text-primary text-2xl">
+    light_mode
+  </span>
 );
 const MoonIcon = () => (
   <span class="material-symbols-outlined text-primary text-2xl">dark_mode</span>
