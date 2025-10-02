@@ -1,4 +1,21 @@
 @import "tailwindcss";
+
+@theme {
+  /* Colores personalizados */
+  --color-primary: #002f5c;
+  --color-background-light: #f5f7f8;
+  --color-background-dark: #0f1923;
+
+  /* Fuentes personalizadas */
+  --font-family-display: "Manrope", system-ui, sans-serif;
+
+  /* Border radius personalizado */
+  --radius: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+}
+
 .fresh-gradient {
   background-color: rgb(134, 239, 172);
   background-image: linear-gradient(
@@ -7,4 +24,8 @@
     rgb(187, 247, 208),
     rgb(254, 249, 195)
   );
+}
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
 }
