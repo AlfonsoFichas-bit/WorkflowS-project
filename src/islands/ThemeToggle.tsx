@@ -1,4 +1,6 @@
 import { useSignal } from "@preact/signals";
+import { useEffect } from "preact/hooks";
+
 
 const SunIcon = () => (
   <span class="material-symbols-outlined text-primary">light_mode</span>
@@ -8,11 +10,14 @@ const MoonIcon = () => (
 );
 
 export default function ThemeToggle() {
-  if (typeof window === "undefined") {
-    return <div class="w-10 h-10" />; // Placeholder for SSR
-  }
+  // Always call hooks at the top
+  const isDark = useSignal(false); // Safe default for SSR
+  const isMounted = useSignal(false);
 
-  const isDark = useSignal(document.documentElement.classList.contains("dark"));
+  useEffect(() => {
+    isDark.value = document.documentElement.classList.contains("dark");
+    isMounted.value = true;
+  }, []);
 
   const toggleTheme = () => {
     isDark.value = !isDark.value;
@@ -20,8 +25,13 @@ export default function ThemeToggle() {
     localStorage.setItem("theme", isDark.value ? "dark" : "light");
   };
 
+  if (!isMounted.value) {
+    return <div class="w-10 h-10" />; // Placeholder for SSR and initial render
+  }
+
   return (
     <button
+      type="button"
       onClick={toggleTheme}
       class="p-2 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors"
       aria-label="Toggle dark mode"
