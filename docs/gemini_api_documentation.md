@@ -105,6 +105,35 @@ Retrieves a user by their ID.
 
 ### Admin - User Management
 
+#### GET /api/admin/users
+
+Retrieves a list of all users. (Admin only)
+
+- **Response (200 OK):**
+
+```json
+[
+    {
+        "ID": 1,
+        "Nombre": "Admin",
+        "ApellidoPaterno": "User",
+        "ApellidoMaterno": "",
+        "Correo": "admin@example.com",
+        "Role": "admin",
+        "CreatedAt": "2023-10-27T10:10:00Z"
+    },
+    {
+        "ID": 2,
+        "Nombre": "Jane",
+        "ApellidoPaterno": "Doe",
+        "ApellidoMaterno": "Smith",
+        "Correo": "jane.doe@example.com",
+        "Role": "user",
+        "CreatedAt": "2023-10-27T10:05:00Z"
+    }
+]
+```
+
 #### POST /api/admin/users
 
 Creates a new standard platform user. (Admin only)

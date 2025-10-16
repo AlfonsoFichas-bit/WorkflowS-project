@@ -1,9 +1,21 @@
 import { useState, useEffect } from "preact/hooks";
 import Modal from "../components/Modal.tsx";
 
+interface User {
+  ID: number;
+  Nombre: string;
+  ApellidoPaterno: string;
+  ApellidoMaterno: string;
+  Correo: string;
+  Role: string;
+  CreatedAt: string;
+}
+
 export default function UserManagementIsland() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
   const [nombre, setNombre] = useState("");
   const [apellidoPaterno, setApellidoPaterno] = useState("");
   const [apellidoMaterno, setApellidoMaterno] = useState("");
@@ -40,6 +52,39 @@ export default function UserManagementIsland() {
     checkAdmin();
   }, []);
 
+  const fetchUsers = async () => {
+    const token = localStorage.getItem("token");
+    if (!token || !isAdmin) return;
+
+    setLoadingUsers(true);
+    try {
+      const response = await fetch("http://localhost:8080/api/admin/users", {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const usersData = await response.json();
+        setUsers(usersData);
+      } else {
+        console.error("Failed to fetch users");
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchUsers();
+    }
+  }, [isAdmin]);
+
   const handleCreateUser = async (e: Event) => {
     e.preventDefault();
     setLoading(true);
@@ -75,6 +120,8 @@ export default function UserManagementIsland() {
         setApellidoMaterno("");
         setCorreo("");
         setContraseña("");
+        setShowModal(false);
+        fetchUsers(); // Actualizar la tabla
       } else {
         const errorData = await response.json();
         setMessage(errorData.error || "Error al crear usuario");
@@ -187,28 +234,40 @@ export default function UserManagementIsland() {
       <div class="mt-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Lista de Usuarios</h3>
         <div class="overflow-x-auto">
-          <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-            <thead>
-              <tr>
-                <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300">ID</th>
-                <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</th>
-                <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Correo</th>
-                <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Rol</th>
-                <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Acciones</th>
+          <table class="min-w-full divide-y-2 divide-gray-200 dark:divide-gray-700">
+            <thead class="ltr:text-left rtl:text-right">
+              <tr class="*:font-medium *:text-gray-900 dark:*:text-white">
+                <th class="px-3 py-2 whitespace-nowrap">ID</th>
+                <th class="px-3 py-2 whitespace-nowrap">Nombre</th>
+                <th class="px-3 py-2 whitespace-nowrap">Correo</th>
+                <th class="px-3 py-2 whitespace-nowrap">Rol</th>
+                <th class="px-3 py-2 whitespace-nowrap">Acciones</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300">1</td>
-                <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300">Usuario Ejemplo</td>
-                <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300">usuario@example.com</td>
-                <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300">user</td>
-                <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm">
-                  <button type="button" class="text-blue-600 hover:text-blue-800 mr-2">Editar</button>
-                  <button type="button" class="text-red-600 hover:text-red-800">Eliminar</button>
-                </td>
-              </tr>
-              {/* Más filas de usuarios aquí cuando agregues la lógica */}
+
+            <tbody class="divide-y divide-gray-200 *:even:bg-gray-50 dark:divide-gray-700 dark:*:even:bg-gray-800">
+              {loadingUsers ? (
+                <tr>
+                  <td colspan={5} class="px-3 py-2 text-center text-gray-500 dark:text-gray-400">Cargando usuarios...</td>
+                </tr>
+              ) : users.length === 0 ? (
+                <tr>
+                  <td colspan={5} class="px-3 py-2 text-center text-gray-500 dark:text-gray-400">No hay usuarios registrados.</td>
+                </tr>
+              ) : (
+                users.map((user) => (
+                  <tr key={user.ID} class="*:text-gray-900 *:first:font-medium dark:*:text-white">
+                    <td class="px-3 py-2 whitespace-nowrap">{user.ID}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">{`${user.Nombre} ${user.ApellidoPaterno} ${user.ApellidoMaterno}`.trim()}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">{user.Correo}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">{user.Role}</td>
+                    <td class="px-3 py-2 whitespace-nowrap">
+                      <button type="button" class="text-blue-600 hover:text-blue-800 mr-2">Editar</button>
+                      <button type="button" class="text-red-600 hover:text-red-800">Eliminar</button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

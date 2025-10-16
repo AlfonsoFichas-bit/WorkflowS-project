@@ -43,7 +43,7 @@ export default define.page(function Home() {
               </div>
               <div class="relative w-full aspect-square max-w-md mx-auto md:max-w-none">
                 <div class="absolute inset-0 bg-primary/10 dark:bg-primary/20 rounded-full blur-3xl"></div>
-                <img alt="Abstract graphic representing workflow and collaboration" class="relative w-full h-full object-cover rounded-xl shadow-2xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZWtmhqqHfnQWiIeubw-gYitn8AB0iWPYljr9PLNTKFoigo3OJ6X9nW68YqEBL9Ptp9YnWQMva_YNyF2o6JwhvXMtXUzhWsNl1EtnFjE_jkBiCAo9m2Mv_oNlMh0-QmWqbauSK6e5Bn0_I7D4ypRKziAdJWnxpl2h4B_CMAqUv61njVtEzPAtOiaJpPX2mdBu2RSbQ9TBE8G53GgMI7Hhpn9Lc-ZXbG2o1L2UEPc8JgvZiTEEeto1BubWU0uvkTajJlxLBs7_ibdsJ" />
+                 <img alt="Abstract graphic representing workflow and collaboration" class="relative w-full h-full object-cover rounded-xl shadow-2xl" src="/imagen.webp" />
               </div>
             </div>
           </section>
