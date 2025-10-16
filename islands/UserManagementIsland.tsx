@@ -1,5 +1,4 @@
 import { useState, useEffect } from "preact/hooks";
-import { verifyJWT } from "../utils/jwt.ts";
 
 export default function UserManagementIsland() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -12,13 +11,31 @@ export default function UserManagementIsland() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const payload = verifyJWT(token);
-      if (payload && payload.role === "admin") {
-        setIsAdmin(true);
+    const checkAdmin = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      try {
+        const response = await fetch("http://localhost:8080/api/me", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const userData = await response.json();
+          if (userData.Role === "admin") {
+            setIsAdmin(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error checking admin status:", error);
       }
-    }
+    };
+
+    checkAdmin();
   }, []);
 
   const handleCreateUser = async (e: Event) => {
@@ -34,7 +51,7 @@ export default function UserManagementIsland() {
     }
 
     try {
-      const response = await fetch("/api/admin/users", {
+      const response = await fetch("http://localhost:8080/api/admin/users", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
