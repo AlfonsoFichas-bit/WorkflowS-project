@@ -1,5 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
 import Modal from "../components/Modal.tsx";
+import { MaterialSymbol } from "../components/MaterialSymbol.tsx";
 
 interface User {
   ID: number;
@@ -14,6 +15,8 @@ interface User {
 export default function UserManagementIsland() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [nombre, setNombre] = useState("");
@@ -76,6 +79,91 @@ export default function UserManagementIsland() {
       console.error("Error fetching users:", error);
     } finally {
       setLoadingUsers(false);
+    }
+  };
+
+  const handleEditUser = (user: User) => {
+    setEditingUser(user);
+    setNombre(user.Nombre);
+    setApellidoPaterno(user.ApellidoPaterno);
+    setApellidoMaterno(user.ApellidoMaterno);
+    setCorreo(user.Correo);
+    setContraseña(""); // No mostrar contraseña en edición
+    setShowEditModal(true);
+  };
+
+  const handleUpdateUser = async (e: Event) => {
+    e.preventDefault();
+    if (!editingUser) return;
+
+    setLoading(true);
+    setMessage("");
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setMessage("No autenticado");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/admin/users/${editingUser.ID}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          Nombre: nombre,
+          ApellidoPaterno: apellidoPaterno,
+          ApellidoMaterno: apellidoMaterno,
+          Correo: correo,
+          ...(contraseña && { Contraseña: contraseña }), // Solo si se cambia
+        }),
+      });
+
+      if (response.ok) {
+        setMessage("Usuario actualizado exitosamente");
+        setShowEditModal(false);
+        setEditingUser(null);
+        fetchUsers(); // Recargar lista
+      } else {
+        const errorData = await response.json();
+        setMessage(errorData.error || "Error al actualizar usuario");
+      }
+    } catch (_err) {
+      setMessage("Error de conexión");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async (userId: number) => {
+    if (!confirm("¿Estás seguro de que quieres eliminar este usuario?")) return;
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setMessage("No autenticado");
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        setMessage("Usuario eliminado exitosamente");
+        fetchUsers(); // Recargar lista
+      } else {
+        const errorData = await response.json();
+        setMessage(errorData.error || "Error al eliminar usuario");
+      }
+    } catch (_err) {
+      setMessage("Error de conexión");
     }
   };
 
@@ -231,6 +319,82 @@ export default function UserManagementIsland() {
         </div>
       </Modal>
 
+      <Modal
+        show={showEditModal}
+        maxWidth="lg"
+        closeable
+        onClose={() => setShowEditModal(false)}
+      >
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Editar Usuario</h2>
+          <form onSubmit={handleUpdateUser}>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editNombre">Nombre</label>
+              <input
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+                id="editNombre"
+                type="text"
+                value={nombre}
+                onChange={(e) => setNombre((e.target as HTMLInputElement).value)}
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editApellidoPaterno">Apellido Paterno</label>
+              <input
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+                id="editApellidoPaterno"
+                type="text"
+                value={apellidoPaterno}
+                onChange={(e) => setApellidoPaterno((e.target as HTMLInputElement).value)}
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editApellidoMaterno">Apellido Materno</label>
+              <input
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+                id="editApellidoMaterno"
+                type="text"
+                value={apellidoMaterno}
+                onChange={(e) => setApellidoMaterno((e.target as HTMLInputElement).value)}
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editCorreo">Correo</label>
+              <input
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+                id="editCorreo"
+                type="email"
+                value={correo}
+                onChange={(e) => setCorreo((e.target as HTMLInputElement).value)}
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editContraseña">Nueva Contraseña (opcional)</label>
+              <input
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+                id="editContraseña"
+                type="password"
+                value={contraseña}
+                onChange={(e) => setContraseña((e.target as HTMLInputElement).value)}
+                placeholder="Deja vacío para no cambiar"
+              />
+            </div>
+            {message && <p class="text-red-500 dark:text-red-400 text-sm mb-4">{message}</p>}
+            <button
+              type="submit"
+              class="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary/90 transition duration-300 disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? "Actualizando..." : "Actualizar Usuario"}
+            </button>
+          </form>
+        </div>
+      </Modal>
+
       <div class="mt-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Lista de Usuarios</h3>
         <div class="overflow-x-auto">
@@ -262,8 +426,12 @@ export default function UserManagementIsland() {
                     <td class="px-3 py-2 whitespace-nowrap">{user.Correo}</td>
                     <td class="px-3 py-2 whitespace-nowrap">{user.Role}</td>
                     <td class="px-3 py-2 whitespace-nowrap">
-                      <button type="button" class="text-blue-600 hover:text-blue-800 mr-2">Editar</button>
-                      <button type="button" class="text-red-600 hover:text-red-800">Eliminar</button>
+                      <button type="button" class="text-blue-600 hover:text-blue-800 mr-2" onClick={() => handleEditUser(user)} title="Editar">
+                        <MaterialSymbol icon="edit" className="icon-md" />
+                      </button>
+                      <button type="button" class="text-red-600 hover:text-red-800" onClick={() => handleDeleteUser(user.ID)} title="Eliminar">
+                        <MaterialSymbol icon="delete" className="icon-md" />
+                      </button>
                     </td>
                   </tr>
                 ))

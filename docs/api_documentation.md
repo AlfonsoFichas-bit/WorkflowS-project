@@ -186,6 +186,42 @@ Creates a new admin user. (Admin only)
     }
     ```
 
+#### PUT /api/admin/users/:id
+
+Updates a user's information. (Admin only)
+
+-   **Path Parameters:**
+    -   `id` (uint): The ID of the user to update.
+-   **Request Body:**
+
+    ```json
+    {
+        "Nombre": "Updated Name"
+    }
+    ```
+
+-   **Response (200 OK):**
+
+    ```json
+    {
+        "ID": 2,
+        "Nombre": "Updated Name",
+        "ApellidoPaterno": "Doe",
+        "ApellidoMaterno": "Smith",
+        "Correo": "jane.doe@example.com",
+        "Role": "user",
+        "CreatedAt": "2023-10-27T10:05:00Z"
+    }
+    ```
+
+#### DELETE /api/admin/users/:id
+
+Deletes a user. (Admin only)
+
+-   **Path Parameters:**
+    -   `id` (uint): The ID of the user to delete.
+-   **Response (204 No Content)**
+
 ### Public Admin Creation
 
 #### POST /create-admin
