@@ -18,7 +18,11 @@ export default function UserManagementIsland() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5);
   const [nombre, setNombre] = useState("");
   const [apellidoPaterno, setApellidoPaterno] = useState("");
   const [apellidoMaterno, setApellidoMaterno] = useState("");
@@ -89,6 +93,7 @@ export default function UserManagementIsland() {
     setApellidoMaterno(user.ApellidoMaterno);
     setCorreo(user.Correo);
     setContraseña(""); // No mostrar contraseña en edición
+    setMessage(""); // Limpiar mensaje
     setShowEditModal(true);
   };
 
@@ -127,6 +132,7 @@ export default function UserManagementIsland() {
         setShowEditModal(false);
         setEditingUser(null);
         fetchUsers(); // Recargar lista
+        setTimeout(() => setMessage(""), 3000); // Limpiar mensaje después de 3 segundos
       } else {
         const errorData = await response.json();
         setMessage(errorData.error || "Error al actualizar usuario");
@@ -158,6 +164,7 @@ export default function UserManagementIsland() {
       if (response.ok) {
         setMessage("Usuario eliminado exitosamente");
         fetchUsers(); // Recargar lista
+        setTimeout(() => setMessage(""), 3000); // Limpiar mensaje después de 3 segundos
       } else {
         const errorData = await response.json();
         setMessage(errorData.error || "Error al eliminar usuario");
@@ -172,6 +179,20 @@ export default function UserManagementIsland() {
       fetchUsers();
     }
   }, [isAdmin]);
+
+  useEffect(() => {
+    const filtered = users.filter(user =>
+      `${user.Nombre} ${user.ApellidoPaterno} ${user.ApellidoMaterno}`.toLowerCase().includes(search.toLowerCase()) ||
+      user.Correo.toLowerCase().includes(search.toLowerCase()) ||
+      user.Role.toLowerCase().includes(search.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+    setCurrentPage(1); // Reset to first page when searching
+  }, [users, search]);
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
 
   const handleCreateUser = async (e: Event) => {
     e.preventDefault();
@@ -210,6 +231,7 @@ export default function UserManagementIsland() {
         setContraseña("");
         setShowModal(false);
         fetchUsers(); // Actualizar la tabla
+        setTimeout(() => setMessage(""), 3000); // Limpiar mensaje después de 3 segundos
       } else {
         const errorData = await response.json();
         setMessage(errorData.error || "Error al crear usuario");
@@ -237,7 +259,15 @@ export default function UserManagementIsland() {
         <button
           type="button"
           class="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary/90 transition duration-300"
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setNombre("");
+            setApellidoPaterno("");
+            setApellidoMaterno("");
+            setCorreo("");
+            setContraseña("");
+            setMessage("");
+            setShowModal(true);
+          }}
         >
           Crear Usuario
         </button>
@@ -397,6 +427,18 @@ export default function UserManagementIsland() {
 
       <div class="mt-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Lista de Usuarios</h3>
+
+        {/* Search Input */}
+        <div class="mb-4">
+          <input
+            type="text"
+            placeholder="Buscar usuarios por nombre, correo o rol..."
+            value={search}
+            onChange={(e) => setSearch((e.target as HTMLInputElement).value)}
+            class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+          />
+        </div>
+
         <div class="overflow-x-auto">
           <table class="min-w-full divide-y-2 divide-gray-200 dark:divide-gray-700">
             <thead class="ltr:text-left rtl:text-right">
@@ -419,7 +461,7 @@ export default function UserManagementIsland() {
                   <td colspan={5} class="px-3 py-2 text-center text-gray-500 dark:text-gray-400">No hay usuarios registrados.</td>
                 </tr>
               ) : (
-                users.map((user) => (
+                paginatedUsers.map((user) => (
                   <tr key={user.ID} class="*:text-gray-900 *:first:font-medium dark:*:text-white">
                     <td class="px-3 py-2 whitespace-nowrap">{user.ID}</td>
                     <td class="px-3 py-2 whitespace-nowrap">{`${user.Nombre} ${user.ApellidoPaterno} ${user.ApellidoMaterno}`.trim()}</td>
@@ -439,6 +481,31 @@ export default function UserManagementIsland() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div class="flex justify-center items-center mt-4 space-x-2">
+            <button
+              type="button"
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              class="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Anterior
+            </button>
+            <span class="px-3 py-2 text-gray-700 dark:text-gray-300">
+              Página {currentPage} de {totalPages}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              class="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Siguiente
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
