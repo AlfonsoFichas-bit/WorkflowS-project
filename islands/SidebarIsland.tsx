@@ -2,6 +2,16 @@ import { useState, useEffect } from "preact/hooks";
 import { useIsMobile } from "../utils/hooks.ts";
 import { MaterialSymbol } from "../components/MaterialSymbol.tsx";
 
+interface User {
+  ID: number;
+  Nombre: string;
+  ApellidoPaterno: string;
+  ApellidoMaterno: string;
+  Correo: string;
+  Role: string;
+  CreatedAt: string;
+}
+
 interface SidebarProps {
   user?: {
     name: string;
@@ -12,13 +22,15 @@ interface SidebarProps {
 }
 
 export default function SidebarIsland({
-  user = {
+  user: initialUser = {
     name: "Usuario",
     email: "usuario@example.com",
     role: "team_developer",
     formattedRole: "Team Developer",
   },
 }: SidebarProps) {
+  const [user, setUser] = useState(initialUser);
+  const [loading, setLoading] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
       const savedState = localStorage.getItem("sidebarCollapsed");
@@ -47,6 +59,45 @@ export default function SidebarIsland({
         mainElement.style.marginLeft = "16rem";
       }
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:8080/api/me", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const userData: User = await response.json();
+          const fullName = `${userData.Nombre} ${userData.ApellidoPaterno}`.trim();
+          setUser({
+            name: fullName,
+            email: userData.Correo,
+            role: userData.Role,
+            formattedRole: userData.Role.charAt(0).toUpperCase() + userData.Role.slice(1).replace("_", " "),
+          });
+        } else {
+          console.error("Failed to fetch user data");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
   const isMobile = useIsMobile();
@@ -199,17 +250,17 @@ export default function SidebarIsland({
                   </nav>
                 </div>
 
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold">
-                      {user.name.charAt(0)}
-                    </div>
-                    <div className="flex-grow">
-                      <p className="font-medium text-gray-900 dark:text-gray-100">{user.name}</p>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {user.formattedRole || user.role}
-                      </p>
-                    </div>
+                 <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                   <div className="flex items-center gap-3 mb-4">
+                     <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold">
+                       {loading ? "..." : user.name.charAt(0)}
+                     </div>
+                     <div className="flex-grow">
+                       <p className="font-medium text-gray-900 dark:text-gray-100">{loading ? "Cargando..." : user.name}</p>
+                       <p className="text-sm text-gray-500 dark:text-gray-400">
+                         {loading ? "Cargando..." : (user.formattedRole || user.role)}
+                       </p>
+                     </div>
                     <button
                       type="button"
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
@@ -426,19 +477,19 @@ export default function SidebarIsland({
           }`}
           title="Menú de usuario"
         >
-          <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold transition-all duration-300 ease-in-out">
-            {user.name.charAt(0)}
-          </div>
-          {!isCollapsed && (
-            <>
-              <div className="flex-grow transition-all duration-300 ease-in-out">
-                <p className="font-medium text-gray-900 dark:text-gray-100 transition-all duration-300 ease-in-out">
-                  {user.name}
-                </p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 transition-all duration-300 ease-in-out">
-                  {user.formattedRole || user.role}
-                </p>
-              </div>
+           <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold transition-all duration-300 ease-in-out">
+             {loading ? "..." : user.name.charAt(0)}
+           </div>
+           {!isCollapsed && (
+             <>
+               <div className="flex-grow transition-all duration-300 ease-in-out">
+                 <p className="font-medium text-gray-900 dark:text-gray-100 transition-all duration-300 ease-in-out">
+                   {loading ? "Cargando..." : user.name}
+                 </p>
+                 <p className="text-sm text-gray-500 dark:text-gray-400 transition-all duration-300 ease-in-out">
+                   {loading ? "Cargando..." : (user.formattedRole || user.role)}
+                 </p>
+               </div>
               <MaterialSymbol
                 icon={isUserMenuOpen ? "expand_less" : "expand_more"}
                 className="icon-md"
