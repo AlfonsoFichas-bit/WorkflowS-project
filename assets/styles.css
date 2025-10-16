@@ -1,11 +1,39 @@
 @import "tailwindcss";
 
-.fresh-gradient {
-  background-color: rgb(134, 239, 172);
-  background-image: linear-gradient(
-    to right bottom,
-    rgb(219, 234, 254),
-    rgb(187, 247, 208),
-    rgb(254, 249, 195)
-  );
+/* Define tus colores personalizados */
+@theme {
+    --color-primary: #002f5c;
+    --color-background-light: #f5f7f8;
+    --color-background-dark: #0f1923;
+
+    /* Extiende los radios de borde predeterminados */
+    --radius: 0.25rem;
+    --radius-lg: 0.5rem;
+    --radius-xl: 0.75rem;
+    --radius-full: 9999px;
+
+    /* Define la fuente */
+    --font-family-display: Manrope, ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Versión para modo claro (cuando <html> NO tiene la clase 'dark') */
+:root:not(.dark) .fresh-gradient {
+    background-color: rgb(134, 239, 172); /* Color base opcional */
+    background-image: linear-gradient(
+            to right bottom,
+            rgb(219, 234, 254), /* Azul claro */
+            rgb(187, 247, 208), /* Verde claro */
+            rgb(254, 249, 195)  /* Amarillo claro */
+    );
+}
+
+/* Versión para modo oscuro (cuando <html> tiene la clase 'dark') */
+html.dark .fresh-gradient {
+    background-color: var(--color-background-dark);
+    background-image: linear-gradient(
+            to right bottom,
+            var(--color-background-dark),
+            #1a2630,
+            var(--color-background-dark)
+    );
 }
