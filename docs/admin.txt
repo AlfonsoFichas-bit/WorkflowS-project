@@ -1,0 +1,7 @@
+curl -X POST http://localhost:8080/login \                                         (base)
+         -H "Content-Type: application/json" \
+         -d '{
+       "correo": "admin@example.com",
+       "contraseña": "admin123"
+     }'
+{"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NjA4Nzc5MTgsImlhdCI6MTc2MDYxODcxOCwibmFtIjoiQWRtaW4iLCJyb2wiOiJhZG1pbiIsInN1YiI6MX0.1X8IjBgZ-V6_1hKyz0_3zct6DGDrPWVkK9A-fHg4x2U"}

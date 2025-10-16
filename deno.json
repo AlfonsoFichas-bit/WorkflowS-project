@@ -16,7 +16,8 @@
     "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.5",
     "vite": "npm:vite@^7.1.10",
     "tailwindcss": "npm:tailwindcss@^4.1.14",
-    "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.14"
+    "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.14",
+    "djwt": "npm:djwt@^2.0.0"
   },
   "compilerOptions": {
     "lib": ["dom", "dom.asynciterable", "dom.iterable", "deno.ns"],
