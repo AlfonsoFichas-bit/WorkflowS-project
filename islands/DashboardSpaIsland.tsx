@@ -82,19 +82,16 @@ export default function DashboardSpaIsland() {
         </div>
       ),
     },
-    {
-      path: "/dashboard/users",
-      title: "Usuarios",
-      render: () => (
-        <div class="max-w-7xl mx-auto">
-          <Breadcrumbs breadcrumbs={[{ title: "Dashboard", href: "/dashboard" }, { title: "Usuarios" }]} />
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Usuarios</h2>
-            <p class="text-gray-600 dark:text-gray-400">Gestión de usuarios.</p>
-          </div>
-        </div>
-      ),
-    },
+     {
+       path: "/dashboard/users",
+       title: "Usuarios",
+       render: () => (
+         <div class="max-w-7xl mx-auto">
+           <Breadcrumbs breadcrumbs={[{ title: "Dashboard", href: "/dashboard" }, { title: "Usuarios" }]} />
+           <UserManagementIsland />
+         </div>
+       ),
+     },
     {
       path: "/dashboard/icons",
       title: "Iconos",

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "preact/hooks";
+import Modal from "../components/Modal.tsx";
 
 export default function UserManagementIsland() {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [nombre, setNombre] = useState("");
   const [apellidoPaterno, setApellidoPaterno] = useState("");
   const [apellidoMaterno, setApellidoMaterno] = useState("");
@@ -95,72 +97,122 @@ export default function UserManagementIsland() {
 
   return (
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Crear Nuevo Usuario</h2>
-      <form onSubmit={handleCreateUser}>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2" for="nombre">Nombre</label>
-          <input
-            class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-            id="nombre"
-            type="text"
-            value={nombre}
-            onChange={(e) => setNombre((e.target as HTMLInputElement).value)}
-            required
-          />
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2" for="apellidoPaterno">Apellido Paterno</label>
-          <input
-            class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-            id="apellidoPaterno"
-            type="text"
-            value={apellidoPaterno}
-            onChange={(e) => setApellidoPaterno((e.target as HTMLInputElement).value)}
-            required
-          />
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2" for="apellidoMaterno">Apellido Materno</label>
-          <input
-            class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-            id="apellidoMaterno"
-            type="text"
-            value={apellidoMaterno}
-            onChange={(e) => setApellidoMaterno((e.target as HTMLInputElement).value)}
-            required
-          />
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2" for="correo">Correo</label>
-          <input
-            class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-            id="correo"
-            type="email"
-            value={correo}
-            onChange={(e) => setCorreo((e.target as HTMLInputElement).value)}
-            required
-          />
-        </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2" for="contraseña">Contraseña</label>
-          <input
-            class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
-            id="contraseña"
-            type="password"
-            value={contraseña}
-            onChange={(e) => setContraseña((e.target as HTMLInputElement).value)}
-            required
-          />
-        </div>
-        {message && <p class="text-red-500 text-sm mb-4">{message}</p>}
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Gestión de Usuarios</h2>
         <button
-          type="submit"
-          class="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary/90 transition duration-300 disabled:opacity-50"
-          disabled={loading}
+          type="button"
+          class="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary/90 transition duration-300"
+          onClick={() => setShowModal(true)}
         >
-          {loading ? "Creando..." : "Crear Usuario"}
+          Crear Usuario
         </button>
-      </form>
+      </div>
+
+      <Modal
+        show={showModal}
+        maxWidth="lg"
+        closeable
+        onClose={() => setShowModal(false)}
+      >
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Crear Nuevo Usuario</h2>
+          <form onSubmit={handleCreateUser}>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2" for="nombre">Nombre</label>
+              <input
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                id="nombre"
+                type="text"
+                value={nombre}
+                onChange={(e) => setNombre((e.target as HTMLInputElement).value)}
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2" for="apellidoPaterno">Apellido Paterno</label>
+              <input
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                id="apellidoPaterno"
+                type="text"
+                value={apellidoPaterno}
+                onChange={(e) => setApellidoPaterno((e.target as HTMLInputElement).value)}
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2" for="apellidoMaterno">Apellido Materno</label>
+              <input
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                id="apellidoMaterno"
+                type="text"
+                value={apellidoMaterno}
+                onChange={(e) => setApellidoMaterno((e.target as HTMLInputElement).value)}
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2" for="correo">Correo</label>
+              <input
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                id="correo"
+                type="email"
+                value={correo}
+                onChange={(e) => setCorreo((e.target as HTMLInputElement).value)}
+                required
+              />
+            </div>
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700 mb-2" for="contraseña">Contraseña</label>
+              <input
+                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                id="contraseña"
+                type="password"
+                value={contraseña}
+                onChange={(e) => setContraseña((e.target as HTMLInputElement).value)}
+                required
+              />
+            </div>
+            {message && <p class="text-red-500 text-sm mb-4">{message}</p>}
+            <button
+              type="submit"
+              class="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary/90 transition duration-300 disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? "Creando..." : "Crear Usuario"}
+            </button>
+          </form>
+        </div>
+      </Modal>
+
+      <div class="mt-6">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Lista de Usuarios</h3>
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+            <thead>
+              <tr>
+                <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300">ID</th>
+                <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Nombre</th>
+                <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Correo</th>
+                <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Rol</th>
+                <th class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-left text-sm font-medium text-gray-700 dark:text-gray-300">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300">1</td>
+                <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300">Usuario Ejemplo</td>
+                <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300">usuario@example.com</td>
+                <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm text-gray-700 dark:text-gray-300">user</td>
+                <td class="px-4 py-2 border-b border-gray-200 dark:border-gray-700 text-sm">
+                  <button type="button" class="text-blue-600 hover:text-blue-800 mr-2">Editar</button>
+                  <button type="button" class="text-red-600 hover:text-red-800">Eliminar</button>
+                </td>
+              </tr>
+              {/* Más filas de usuarios aquí cuando agregues la lógica */}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

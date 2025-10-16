@@ -15,7 +15,7 @@ export default define.page(function Login() {
             <img alt="Universidad La Salle Logo" class="h-10" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6fMylsoLD5bqSYyw5Y0aNKl-DmuxKV5xWM_QBTfrra-gca_ujHkAFTZvsLzDOFehpFizUhdikHgT_iqp_i8y3WMr6wlzqV15qvOwFZAyFg5p7_SMFJU43vIpGZQ4AOHKEOD9Ip3__9cPZrkRgpTudfOkBCpdaOUAv7LqiuyI1FLyr6DUZnLRfip6KycIuuTKxFPZqclFNj2Qksj5uUqr1krAeZDELtenV_ES98DaZc3I-b7gMGmDTaTTDMgeC-fS3P6CxTmgBSqHF" />
           </div>
           <div class="bg-white dark:bg-background-dark rounded-xl shadow-lg p-8 border border-gray-200 dark:border-gray-700">
-            <h1 class="text-2xl font-bold text-center text-primary mb-6">Iniciar Sesión</h1>
+            <h1 class="text-2xl font-bold text-center text-slate-200 mb-6">Iniciar Sesión</h1>
             <LoginIsland />
           </div>
         </div>
