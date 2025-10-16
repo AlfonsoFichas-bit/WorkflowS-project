@@ -1,40 +1,6 @@
 import { useState, useEffect } from "preact/hooks";
-import { cn, useIsMobile } from "../utils/hooks.ts";
+import { useIsMobile } from "../utils/hooks.ts";
 import { MaterialSymbol } from "../components/MaterialSymbol.tsx";
-
-// Navigation items
-const navItems = [
-  {
-    title: "Dashboard",
-    href: "/dashboard",
-    iconName: "dashboard",
-  },
-  {
-    title: "Proyectos",
-    href: "/dashboard/projects",
-    iconName: "folder",
-  },
-  {
-    title: "Tareas",
-    href: "/dashboard/tasks",
-    iconName: "task",
-  },
-  {
-    title: "Equipo",
-    href: "/dashboard/team",
-    iconName: "group",
-  },
-  {
-    title: "Usuarios",
-    href: "/dashboard/users",
-    iconName: "person",
-  },
-  {
-    title: "Iconos",
-    href: "/dashboard/icons",
-    iconName: "palette",
-  },
-];
 
 interface SidebarProps {
   user?: {
@@ -53,7 +19,6 @@ export default function SidebarIsland({
     formattedRole: "Team Developer",
   },
 }: SidebarProps) {
-  // Inicializar el estado de colapso desde localStorage si existe
   const [isCollapsed, setIsCollapsed] = useState(() => {
     if (typeof window !== "undefined") {
       const savedState = localStorage.getItem("sidebarCollapsed");
@@ -62,36 +27,31 @@ export default function SidebarIsland({
     return false;
   });
 
-  // Efecto para inicializar el estado del sidebar cuando se carga la página
   useEffect(() => {
-    // Verificar el estado inicial del sidebar
     const savedState = localStorage.getItem("sidebarCollapsed");
     const isInitiallyCollapsed = savedState === "true";
 
-    // Aplicar la clase al body
     if (isInitiallyCollapsed) {
       document.body.classList.add("sidebar-collapsed");
     } else {
       document.body.classList.remove("sidebar-collapsed");
     }
 
-    // Aplicar estilos al contenido principal
     const mainElement = document.querySelector("main");
     if (mainElement) {
       if (isInitiallyCollapsed) {
         mainElement.classList.add("sidebar-collapsed-main");
-        // Aplicar el estilo directamente para evitar la transición inicial
-        mainElement.style.marginLeft = "4rem"; // 64px
+        mainElement.style.marginLeft = "4rem";
       } else {
         mainElement.classList.remove("sidebar-collapsed-main");
-        // Aplicar el estilo directamente para evitar la transición inicial
-        mainElement.style.marginLeft = "16rem"; // 256px
+        mainElement.style.marginLeft = "16rem";
       }
     }
   }, []);
 
   const isMobile = useIsMobile();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
@@ -101,44 +61,35 @@ export default function SidebarIsland({
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
-  // Efecto para actualizar el estado de colapso en el localStorage y aplicar estilos
   useEffect(() => {
-    // Guardar el estado de colapso en localStorage
     localStorage.setItem("sidebarCollapsed", isCollapsed ? "true" : "false");
 
-    // Actualizar la clase del body para que el contenido principal se ajuste
     if (isCollapsed) {
       document.body.classList.add("sidebar-collapsed");
-
-      // Aplicar estilos directamente al contenido principal
       const mainElement = document.querySelector("main");
       if (mainElement) {
         mainElement.classList.add("sidebar-collapsed-main");
       }
     } else {
       document.body.classList.remove("sidebar-collapsed");
-
-      // Quitar estilos del contenido principal
       const mainElement = document.querySelector("main");
       if (mainElement) {
         mainElement.classList.remove("sidebar-collapsed-main");
       }
     }
 
-    // Aplicar estilos con un pequeño retraso para asegurar la transición suave
     setTimeout(() => {
       const mainElement = document.querySelector("main");
       if (mainElement) {
         if (isCollapsed) {
-          mainElement.style.marginLeft = "4rem"; // 64px
+          mainElement.style.marginLeft = "4rem";
         } else {
-          mainElement.style.marginLeft = "16rem"; // 256px
+          mainElement.style.marginLeft = "16rem";
         }
       }
     }, 0);
   }, [isCollapsed]);
 
-  // Mobile sidebar
   if (isMobile) {
     return (
       <>
@@ -177,19 +128,48 @@ export default function SidebarIsland({
 
                 <div className="flex-1 overflow-y-auto p-4">
                   <nav className="space-y-2">
-                    {navItems.map((item) => (
-                      <a
-                        key={item.title}
-                        href={item.href}
-                        className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
-                      >
-                        <MaterialSymbol
-                          icon={item.iconName}
-                          className="icon-md"
-                        />
-                        <span>{item.title}</span>
-                      </a>
-                    ))}
+                    <a
+                      href="/dashboard"
+                      className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
+                    >
+                      <MaterialSymbol icon="dashboard" className="icon-md" fill={1} />
+                      <span>Dashboard</span>
+                    </a>
+                    <a
+                      href="/dashboard/projects"
+                      className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
+                    >
+                      <MaterialSymbol icon="folder" className="icon-md" />
+                      <span>Proyectos</span>
+                    </a>
+                    <a
+                      href="/dashboard/tasks"
+                      className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
+                    >
+                      <MaterialSymbol icon="task" className="icon-md" />
+                      <span>Tareas</span>
+                    </a>
+                    <a
+                      href="/dashboard/team"
+                      className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
+                    >
+                      <MaterialSymbol icon="group" className="icon-md" />
+                      <span>Equipo</span>
+                    </a>
+                    <a
+                      href="/dashboard/users"
+                      className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
+                    >
+                      <MaterialSymbol icon="person" className="icon-md" />
+                      <span>Usuarios</span>
+                    </a>
+                    <a
+                      href="/dashboard/icons"
+                      className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
+                    >
+                      <MaterialSymbol icon="palette" className="icon-md" />
+                      <span>Iconos</span>
+                    </a>
                   </nav>
                 </div>
 
@@ -204,18 +184,37 @@ export default function SidebarIsland({
                         {user.formattedRole || user.role}
                       </p>
                     </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                      className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out"
+                      title="Menú de usuario"
+                    >
+                      <MaterialSymbol
+                        icon={isUserMenuOpen ? "expand_less" : "expand_more"}
+                        className="icon-md"
+                        weight={500}
+                      />
+                    </button>
                   </div>
-                  <a
-                    href="/auth/logout"
-                    className="flex items-center gap-3 rounded-md p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
-                  >
-                    <MaterialSymbol
-                      icon="logout"
-                      className="icon-md"
-                      fill={1}
-                    />
-                    <span>Cerrar Sesión</span>
-                  </a>
+                  {isUserMenuOpen && (
+                    <div className="space-y-1">
+                      <a
+                        href="/dashboard/profile"
+                        className="flex items-center gap-3 rounded-md p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out"
+                      >
+                        <MaterialSymbol icon="person" className="icon-md" />
+                        <span>Perfil</span>
+                      </a>
+                      <a
+                        href="/auth/logout"
+                        className="flex items-center gap-3 rounded-md p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 ease-in-out"
+                      >
+                        <MaterialSymbol icon="logout" className="icon-md" fill={1} />
+                        <span>Cerrar Sesión</span>
+                      </a>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -225,13 +224,9 @@ export default function SidebarIsland({
     );
   }
 
-  // Desktop sidebar
   return (
     <div
-      className={cn(
-        "fixed inset-y-0 left-0 z-30 flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-16" : "w-64",
-      )}
+      className={`fixed inset-y-0 left-0 z-30 flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out ${isCollapsed ? "w-16" : "w-64"}`}
     >
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between transition-all duration-300 ease-in-out">
         {!isCollapsed ? (
@@ -244,10 +239,7 @@ export default function SidebarIsland({
         <button
           type="button"
           onClick={toggleSidebar}
-          className={cn(
-            "p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out",
-            isCollapsed ? "mx-auto" : "ml-auto",
-          )}
+          className={`p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out ${isCollapsed ? "mx-auto" : "ml-auto"}`}
         >
           <MaterialSymbol
             icon={isCollapsed ? "chevron_right" : "chevron_left"}
@@ -259,81 +251,166 @@ export default function SidebarIsland({
 
       <div className="flex-1 overflow-y-auto p-4 transition-all duration-300 ease-in-out">
         <nav className="space-y-2">
-          {navItems.map((item) => (
-            <a
-              key={item.title}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out",
-                isCollapsed && "justify-center px-1.5",
-              )}
-              title={isCollapsed ? item.title : undefined}
-            >
-              <MaterialSymbol
-                icon={item.iconName}
-                className={cn(
-                  "icon-md transition-all duration-300 ease-in-out",
-                  isCollapsed && "icon-lg",
-                )}
-                fill={item.title === "Dashboard" ? 1 : 0}
-                weight={500}
-              />
-              {!isCollapsed && (
-                <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
-                  {item.title}
-                </span>
-              )}
-            </a>
-          ))}
+          <a
+            href="/dashboard"
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            title={isCollapsed ? "Dashboard" : undefined}
+          >
+            <MaterialSymbol
+              icon="dashboard"
+              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              fill={1}
+              weight={500}
+            />
+            {!isCollapsed && (
+              <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
+                Dashboard
+              </span>
+            )}
+          </a>
+          <a
+            href="/dashboard/projects"
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            title={isCollapsed ? "Proyectos" : undefined}
+          >
+            <MaterialSymbol
+              icon="folder"
+              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              weight={500}
+            />
+            {!isCollapsed && (
+              <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
+                Proyectos
+              </span>
+            )}
+          </a>
+          <a
+            href="/dashboard/tasks"
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            title={isCollapsed ? "Tareas" : undefined}
+          >
+            <MaterialSymbol
+              icon="task"
+              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              weight={500}
+            />
+            {!isCollapsed && (
+              <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
+                Tareas
+              </span>
+            )}
+          </a>
+          <a
+            href="/dashboard/team"
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            title={isCollapsed ? "Equipo" : undefined}
+          >
+            <MaterialSymbol
+              icon="group"
+              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              weight={500}
+            />
+            {!isCollapsed && (
+              <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
+                Equipo
+              </span>
+            )}
+          </a>
+          <a
+            href="/dashboard/users"
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            title={isCollapsed ? "Usuarios" : undefined}
+          >
+            <MaterialSymbol
+              icon="person"
+              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              weight={500}
+            />
+            {!isCollapsed && (
+              <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
+                Usuarios
+              </span>
+            )}
+          </a>
+          <a
+            href="/dashboard/icons"
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            title={isCollapsed ? "Iconos" : undefined}
+          >
+            <MaterialSymbol
+              icon="palette"
+              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              weight={500}
+            />
+            {!isCollapsed && (
+              <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
+                Iconos
+              </span>
+            )}
+          </a>
         </nav>
       </div>
 
-      <div className="p-4 border-t border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out">
-        {isCollapsed ? (
-          <div className="flex justify-center transition-all duration-300 ease-in-out">
-            <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold transition-all duration-300 ease-in-out">
-              {user.name.charAt(0)}
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3 mb-4 transition-all duration-300 ease-in-out">
-            <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold transition-all duration-300 ease-in-out">
-              {user.name.charAt(0)}
-            </div>
-            <div className="flex-grow transition-all duration-300 ease-in-out">
-              <p className="font-medium text-gray-900 dark:text-gray-100 transition-all duration-300 ease-in-out">
-                {user.name}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-gray-400 transition-all duration-300 ease-in-out">
-                {user.formattedRole || user.role}
-              </p>
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out relative">
+        {isUserMenuOpen && (
+          <div
+            className={`absolute bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg z-50 transition-all duration-300 ease-in-out ${
+              isCollapsed
+                ? "bottom-full left-1/2 -translate-x-1/2 mb-2 w-48"
+                : "bottom-full left-0 w-full mb-2"
+            }`}
+          >
+            <div className="p-2 space-y-1">
+              <a
+                href="/dashboard/profile"
+                className="flex items-center gap-3 rounded-md p-2 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out"
+                onClick={() => setIsUserMenuOpen(false)}
+              >
+                <MaterialSymbol icon="person" className="icon-md" />
+                <span>Perfil</span>
+              </a>
+              <a
+                href="/auth/logout"
+                className="flex items-center gap-3 rounded-md p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 ease-in-out"
+                onClick={() => setIsUserMenuOpen(false)}
+              >
+                <MaterialSymbol icon="logout" className="icon-md" fill={1} />
+                <span>Cerrar Sesión</span>
+              </a>
             </div>
           </div>
         )}
-        <a
-          href="/auth/logout"
-          className={cn(
-            "flex items-center gap-3 rounded-md p-1.5 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 mt-2 transition-all duration-300 ease-in-out",
-            isCollapsed && "justify-center px-1.5",
-          )}
-          title={isCollapsed ? "Cerrar Sesión" : undefined}
+        <button
+          type="button"
+          onClick={() => {
+            setIsUserMenuOpen(!isUserMenuOpen);
+          }}
+          className={`flex items-center gap-3 w-full rounded-md p-2 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out ${
+            isCollapsed ? "justify-center px-2" : ""
+          }`}
+          title="Menú de usuario"
         >
-          <MaterialSymbol
-            icon="logout"
-            className={cn(
-              "icon-md transition-all duration-300 ease-in-out",
-              isCollapsed && "icon-lg",
-            )}
-            fill={1}
-            weight={500}
-            grade={0}
-          />
+          <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold transition-all duration-300 ease-in-out">
+            {user.name.charAt(0)}
+          </div>
           {!isCollapsed && (
-            <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
-              Cerrar Sesión
-            </span>
+            <>
+              <div className="flex-grow transition-all duration-300 ease-in-out">
+                <p className="font-medium text-gray-900 dark:text-gray-100 transition-all duration-300 ease-in-out">
+                  {user.name}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 transition-all duration-300 ease-in-out">
+                  {user.formattedRole || user.role}
+                </p>
+              </div>
+              <MaterialSymbol
+                icon={isUserMenuOpen ? "expand_less" : "expand_more"}
+                className="icon-md"
+                weight={500}
+              />
+            </>
           )}
-        </a>
+        </button>
       </div>
     </div>
   );
