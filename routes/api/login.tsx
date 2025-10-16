@@ -4,23 +4,6 @@ import { define } from "../../utils.ts";
 import { users } from "../../utils/users.ts";
 import { createJWT } from "../../utils/jwt.ts";
 
-// Simple JWT verification function
-function verifyJWT(token: string, secret: string): Record<string, unknown> | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-    const encodedPayload = parts[1];
-    const payload = JSON.parse(atob(encodedPayload));
-    // Check expiration
-    if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;
-    // Verify signature (simplified, not secure)
-    const expectedSignature = btoa(parts[0] + "." + parts[1] + "." + secret);
-    if (parts[2] !== expectedSignature) return null;
-    return payload;
-  } catch {
-    return null;
-  }
-}
 
 export const handler = define.handlers({
   async POST(ctx: { req: { json: () => Promise<{ correo?: string; contraseña?: string }> } }) {

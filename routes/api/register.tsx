@@ -2,7 +2,7 @@ import { define } from "../../utils.ts";
 import { users } from "../../utils/users.ts";
 
 export const handler = define.handlers({
-  async POST(ctx: any) {
+  async POST(ctx: { req: { json: () => Promise<{ Nombre: string; ApellidoPaterno: string; ApellidoMaterno: string; Correo: string; Contraseña: string }> } }) {
     try {
       const body = await ctx.req.json();
       const { Nombre, ApellidoPaterno, ApellidoMaterno, Correo, Contraseña } = body;

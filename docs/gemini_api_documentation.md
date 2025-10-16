@@ -51,6 +51,18 @@ Authenticates a user and returns a JWT token.
     }
     ```
 
+#### POST /api/logout
+
+Logs out the user. This endpoint is used to signal the server that the user is logging out. The client is responsible for deleting the JWT token from storage.
+
+-   **Response (200 OK):**
+
+    ```json
+    {
+        "message": "Logged out successfully"
+    }
+    ```
+
 ### Users
 
 #### GET /api/me
@@ -150,6 +162,38 @@ Creates a new admin user. (Admin only)
         "Correo": "admin@example.com",
         "Role": "admin",
         "CreatedAt": "2023-10-27T10:10:00Z"
+    }
+    ```
+
+### Public Admin Creation
+
+#### POST /create-admin
+
+Creates a new admin user. This is a public endpoint and should be used with caution.
+
+-   **Request Body:**
+
+    ```json
+    {
+        "Nombre": "Admin",
+        "ApellidoPaterno": "User",
+        "ApellidoMaterno": "",
+        "Correo": "newadmin@example.com",
+        "Contraseña": "strongpassword"
+    }
+    ```
+
+-   **Response (201 Created):**
+
+    ```json
+    {
+        "ID": 4,
+        "Nombre": "Admin",
+        "ApellidoPaterno": "User",
+        "ApellidoMaterno": "",
+        "Correo": "newadmin@example.com",
+        "Role": "admin",
+        "CreatedAt": "2023-10-27T10:12:00Z"
     }
     ```
 

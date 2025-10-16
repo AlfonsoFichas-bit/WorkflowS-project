@@ -61,6 +61,26 @@ export default function SidebarIsland({
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (token) {
+        await fetch("http://localhost:8080/api/logout", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      localStorage.removeItem("token");
+      globalThis.location.href = "/login";
+    }
+  };
+
   useEffect(() => {
     localStorage.setItem("sidebarCollapsed", isCollapsed ? "true" : "false");
 
@@ -130,6 +150,7 @@ export default function SidebarIsland({
                   <nav className="space-y-2">
                     <a
                       href="/dashboard"
+                      data-spa-link
                       className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
                     >
                       <MaterialSymbol icon="dashboard" className="icon-md" fill={1} />
@@ -137,6 +158,7 @@ export default function SidebarIsland({
                     </a>
                     <a
                       href="/dashboard/projects"
+                      data-spa-link
                       className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
                     >
                       <MaterialSymbol icon="folder" className="icon-md" />
@@ -144,6 +166,7 @@ export default function SidebarIsland({
                     </a>
                     <a
                       href="/dashboard/tasks"
+                      data-spa-link
                       className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
                     >
                       <MaterialSymbol icon="task" className="icon-md" />
@@ -151,6 +174,7 @@ export default function SidebarIsland({
                     </a>
                     <a
                       href="/dashboard/team"
+                      data-spa-link
                       className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
                     >
                       <MaterialSymbol icon="group" className="icon-md" />
@@ -158,6 +182,7 @@ export default function SidebarIsland({
                     </a>
                     <a
                       href="/dashboard/users"
+                      data-spa-link
                       className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
                     >
                       <MaterialSymbol icon="person" className="icon-md" />
@@ -165,6 +190,7 @@ export default function SidebarIsland({
                     </a>
                     <a
                       href="/dashboard/icons"
+                      data-spa-link
                       className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
                     >
                       <MaterialSymbol icon="palette" className="icon-md" />
@@ -206,13 +232,14 @@ export default function SidebarIsland({
                         <MaterialSymbol icon="person" className="icon-md" />
                         <span>Perfil</span>
                       </a>
-                      <a
-                        href="/auth/logout"
-                        className="flex items-center gap-3 rounded-md p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 ease-in-out"
-                      >
-                        <MaterialSymbol icon="logout" className="icon-md" fill={1} />
-                        <span>Cerrar Sesión</span>
-                      </a>
+                       <button
+                         type="button"
+                         onClick={handleLogout}
+                         className="flex items-center gap-3 rounded-md p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 ease-in-out w-full text-left"
+                       >
+                         <MaterialSymbol icon="logout" className="icon-md" fill={1} />
+                         <span>Cerrar Sesión</span>
+                       </button>
                     </div>
                   )}
                 </div>
@@ -253,6 +280,7 @@ export default function SidebarIsland({
         <nav className="space-y-2">
           <a
             href="/dashboard"
+            data-spa-link
             className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
             title={isCollapsed ? "Dashboard" : undefined}
           >
@@ -270,6 +298,7 @@ export default function SidebarIsland({
           </a>
           <a
             href="/dashboard/projects"
+            data-spa-link
             className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
             title={isCollapsed ? "Proyectos" : undefined}
           >
@@ -286,6 +315,7 @@ export default function SidebarIsland({
           </a>
           <a
             href="/dashboard/tasks"
+            data-spa-link
             className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
             title={isCollapsed ? "Tareas" : undefined}
           >
@@ -302,6 +332,7 @@ export default function SidebarIsland({
           </a>
           <a
             href="/dashboard/team"
+            data-spa-link
             className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
             title={isCollapsed ? "Equipo" : undefined}
           >
@@ -318,6 +349,7 @@ export default function SidebarIsland({
           </a>
           <a
             href="/dashboard/users"
+            data-spa-link
             className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
             title={isCollapsed ? "Usuarios" : undefined}
           >
@@ -334,6 +366,7 @@ export default function SidebarIsland({
           </a>
           <a
             href="/dashboard/icons"
+            data-spa-link
             className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
             title={isCollapsed ? "Iconos" : undefined}
           >
@@ -369,14 +402,17 @@ export default function SidebarIsland({
                 <MaterialSymbol icon="person" className="icon-md" />
                 <span>Perfil</span>
               </a>
-              <a
-                href="/auth/logout"
-                className="flex items-center gap-3 rounded-md p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 ease-in-out"
-                onClick={() => setIsUserMenuOpen(false)}
-              >
-                <MaterialSymbol icon="logout" className="icon-md" fill={1} />
-                <span>Cerrar Sesión</span>
-              </a>
+               <button
+                 type="button"
+                 onClick={() => {
+                   handleLogout();
+                   setIsUserMenuOpen(false);
+                 }}
+                 className="flex items-center gap-3 rounded-md p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 ease-in-out w-full text-left"
+               >
+                 <MaterialSymbol icon="logout" className="icon-md" fill={1} />
+                 <span>Cerrar Sesión</span>
+               </button>
             </div>
           </div>
         )}

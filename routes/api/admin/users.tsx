@@ -3,7 +3,7 @@ import { users } from "../../../utils/users.ts";
 import { verifyJWT } from "../../../utils/jwt.ts";
 
 export const handler = define.handlers({
-  async POST(ctx: { req: { json: () => Promise<any>; headers: { get: (key: string) => string | null } } }) {
+  async POST(ctx: { req: { json: () => Promise<{ Nombre: string; ApellidoPaterno: string; ApellidoMaterno: string; Correo: string; Contraseña: string }>; headers: { get: (key: string) => string | null } } }) {
     try {
       // Check for Authorization header
       const authHeader = ctx.req.headers.get("Authorization");

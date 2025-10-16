@@ -1,5 +1,5 @@
 // Shared user store (in production, use a database)
-export let users: Array<{
+export const users: Array<{
   id: number;
   nombre: string;
   apellidoPaterno: string;

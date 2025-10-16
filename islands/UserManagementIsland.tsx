@@ -60,7 +60,7 @@ export default function UserManagementIsland() {
         const errorData = await response.json();
         setMessage(errorData.error || "Error al crear usuario");
       }
-    } catch (err) {
+    } catch (_err) {
       setMessage("Error de conexión");
     } finally {
       setLoading(false);
