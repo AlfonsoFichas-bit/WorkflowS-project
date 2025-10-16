@@ -118,9 +118,9 @@ export default function UserManagementIsland() {
           <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Crear Nuevo Usuario</h2>
           <form onSubmit={handleCreateUser}>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2" for="nombre">Nombre</label>
+               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="nombre">Nombre</label>
               <input
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="nombre"
                 type="text"
                 value={nombre}
@@ -129,9 +129,9 @@ export default function UserManagementIsland() {
               />
             </div>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2" for="apellidoPaterno">Apellido Paterno</label>
+               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="apellidoPaterno">Apellido Paterno</label>
               <input
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="apellidoPaterno"
                 type="text"
                 value={apellidoPaterno}
@@ -140,9 +140,9 @@ export default function UserManagementIsland() {
               />
             </div>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2" for="apellidoMaterno">Apellido Materno</label>
+               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="apellidoMaterno">Apellido Materno</label>
               <input
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="apellidoMaterno"
                 type="text"
                 value={apellidoMaterno}
@@ -151,9 +151,9 @@ export default function UserManagementIsland() {
               />
             </div>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2" for="correo">Correo</label>
+               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="correo">Correo</label>
               <input
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="correo"
                 type="email"
                 value={correo}
@@ -162,9 +162,9 @@ export default function UserManagementIsland() {
               />
             </div>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 mb-2" for="contraseña">Contraseña</label>
+               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="contraseña">Contraseña</label>
               <input
-                class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="contraseña"
                 type="password"
                 value={contraseña}
