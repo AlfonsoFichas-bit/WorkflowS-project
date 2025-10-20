@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "preact/hooks";
 import type { VNode } from "preact";
 import { Breadcrumbs } from "../components/Breadcrumbs.tsx";
 import UserManagementIsland from "./UserManagementIsland.tsx";
+import ProjectsIsland from "./ProjectsIsland.tsx";
 
 interface RouteDef {
   path: string; // e.g. "/dashboard", "/dashboard/projects"
@@ -43,19 +44,16 @@ export default function DashboardSpaIsland() {
         </div>
       ),
     },
-    {
-      path: "/dashboard/projects",
-      title: "Proyectos",
-      render: () => (
-        <div class="max-w-7xl mx-auto">
-          <Breadcrumbs breadcrumbs={[{ title: "Dashboard", href: "/dashboard" }, { title: "Proyectos" }]} />
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Proyectos</h2>
-            <p class="text-gray-600 dark:text-gray-400">Listado y gestión de proyectos.</p>
-          </div>
-        </div>
-      ),
-    },
+     {
+       path: "/dashboard/projects",
+       title: "Proyectos",
+       render: () => (
+         <div class="max-w-7xl mx-auto">
+           <Breadcrumbs breadcrumbs={[{ title: "Dashboard", href: "/dashboard" }, { title: "Proyectos" }]} />
+           <ProjectsIsland />
+         </div>
+       ),
+     },
     {
       path: "/dashboard/tasks",
       title: "Tareas",
