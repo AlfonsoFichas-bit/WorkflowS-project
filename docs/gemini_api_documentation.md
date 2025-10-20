@@ -375,6 +375,29 @@ Deletes a project.
     -   `id` (uint): The ID of the project to delete.
 -   **Response (204 No Content)**
 
+#### GET /api/projects/:id/unassigned-users
+
+Retrieves a list of users who can be added to a project. This list excludes existing project members and any users with the 'admin' role.
+
+-   **Path Parameters:**
+    -   `id` (uint): The ID of the project.
+-   **Response (200 OK):**
+
+    ```json
+    [
+        {
+            "ID": 3,
+            "Nombre": "Carlos",
+            "ApellidoPaterno": "Ruiz",
+            "ApellidoMaterno": "Gomez",
+            "Correo": "carlos.ruiz@example.com",
+            "Role": "user",
+            "CreatedAt": "2023-10-27T10:11:00Z"
+        }
+    ]
+    ```
+
+
 ### Admin - Project Management
 
 #### POST /api/admin/projects/:id/members
@@ -403,6 +426,46 @@ Adds a member to a project. (Admin only)
         "CreatedAt": "2023-10-27T10:25:00Z",
         "UpdatedAt": "2023-10-27T10:25:00Z"
     }
+    ```
+
+-   **Response (409 Conflict):**
+
+    Returned if the user is already a member of the project.
+
+    ```json
+    {
+        "error": "user is already a member of this project"
+    }
+    ```
+
+#### GET /api/projects/:id/members
+
+Retrieves a list of all members for a specific project, including their user details and role within the project.
+
+-   **Path Parameters:**
+    -   `id` (uint): The ID of the project.
+-   **Response (200 OK):**
+
+    ```json
+    [
+        {
+            "ID": 1,
+            "UserID": 2,
+            "User": {
+                "ID": 2,
+                "Nombre": "Jane",
+                "ApellidoPaterno": "Doe",
+                "ApellidoMaterno": "Smith",
+                "Correo": "jane.doe@example.com",
+                "Role": "user",
+                "CreatedAt": "2023-10-27T10:05:00Z"
+            },
+            "ProjectID": 1,
+            "Role": "team_developer",
+            "CreatedAt": "2023-10-27T10:25:00Z",
+            "UpdatedAt": "2023-10-27T10:25:00Z"
+        }
+    ]
     ```
 
 ### Sprints

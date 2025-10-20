@@ -17,6 +17,16 @@ interface Project {
   CreatedAt: string;
 }
 
+interface Member {
+  ID: number;
+  UserID: number;
+  User: User;
+  ProjectID: number;
+  Role: string;
+  CreatedAt: string;
+  UpdatedAt: string;
+}
+
 export default function ProjectsIsland() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
@@ -27,10 +37,12 @@ export default function ProjectsIsland() {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
+  const [showMembersModal, setShowMembersModal] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUserId, setSelectedUserId] = useState<number | "">("");
+  const [members, setMembers] = useState<Member[]>([]);
   const [memberRole, setMemberRole] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -193,13 +205,21 @@ export default function ProjectsIsland() {
     }
   };
 
-  const handleAddMember = (project: Project) => {
-    setSelectedProject(project);
-    setSelectedUserId("");
-    setMemberRole("");
-    setMessage("");
-    setShowAddMemberModal(true);
-  };
+   const handleAddMember = (project: Project) => {
+     setSelectedProject(project);
+     setSelectedUserId("");
+     setMemberRole("");
+     setMessage("");
+     setShowAddMemberModal(true);
+     fetchUsers(project.ID);
+   };
+
+   const handleViewMembers = (project: Project) => {
+     setSelectedProject(project);
+     setMessage("");
+     setShowMembersModal(true);
+     fetchMembers(project.ID);
+   };
 
   const handleSubmitAddMember = async (e: Event) => {
     e.preventDefault();
@@ -244,34 +264,57 @@ export default function ProjectsIsland() {
     }
   };
 
-  useEffect(() => {
-    fetchProjects();
-    fetchUsers();
-  }, []);
+   useEffect(() => {
+     fetchProjects();
+   }, []);
 
-  const fetchUsers = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
+   const fetchUsers = async (projectId: number) => {
+     const token = localStorage.getItem("token");
+     if (!token) return;
 
-    try {
-      const response = await fetch("http://localhost:8080/api/admin/users", {
-        method: "GET",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+     try {
+       const response = await fetch(`http://localhost:8080/api/projects/${projectId}/unassigned-users`, {
+         method: "GET",
+         headers: {
+           "Authorization": `Bearer ${token}`,
+           "Content-Type": "application/json",
+         },
+       });
 
-      if (response.ok) {
-        const usersData = await response.json();
-        setUsers(usersData);
-      } else {
-        console.error("Failed to fetch users");
-      }
-    } catch (error) {
-      console.error("Error fetching users:", error);
-    }
-  };
+       if (response.ok) {
+         const usersData = await response.json();
+         setUsers(usersData);
+       } else {
+         console.error("Failed to fetch users");
+       }
+     } catch (error) {
+       console.error("Error fetching users:", error);
+     }
+   };
+
+   const fetchMembers = async (projectId: number) => {
+     const token = localStorage.getItem("token");
+     if (!token) return;
+
+     try {
+       const response = await fetch(`http://localhost:8080/api/projects/${projectId}/members`, {
+         method: "GET",
+         headers: {
+           "Authorization": `Bearer ${token}`,
+           "Content-Type": "application/json",
+         },
+       });
+
+       if (response.ok) {
+         const membersData = await response.json();
+         setMembers(membersData);
+       } else {
+         console.error("Failed to fetch members");
+       }
+     } catch (error) {
+       console.error("Error fetching members:", error);
+     }
+   };
 
   useEffect(() => {
     const filtered = projects.filter(project =>
@@ -442,9 +485,37 @@ export default function ProjectsIsland() {
              </button>
            </form>
          </div>
-       </Modal>
+        </Modal>
 
-       <div class="mt-6">
+        <Modal
+          show={showMembersModal}
+          maxWidth="lg"
+          closeable
+          onClose={() => setShowMembersModal(false)}
+        >
+          <div class="p-6">
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Miembros del Proyecto</h2>
+            {members.length === 0 ? (
+              <p class="text-gray-600 dark:text-gray-400">No hay miembros en este proyecto.</p>
+            ) : (
+              <div class="space-y-4">
+                {members.map((member) => (
+                  <div key={member.ID} class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                    <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">
+                      {`${member.User.Nombre} ${member.User.ApellidoPaterno}`}
+                    </h3>
+                    <p class="text-gray-600 dark:text-gray-400">{member.User.Correo}</p>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">
+                      Rol: {member.Role.replace('_', ' ').toUpperCase()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </Modal>
+
+        <div class="mt-6">
         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Lista de Proyectos</h3>
 
         <div class="mb-4">
@@ -477,17 +548,20 @@ export default function ProjectsIsland() {
                   </span>
                   <span class="text-sm text-gray-500 dark:text-gray-400">ID: {project.ID}</span>
                 </div>
-                <div class="flex justify-end space-x-2">
-                  <button type="button" class="text-blue-600 hover:text-blue-800" onClick={() => handleEditProject(project)} title="Editar">
-                    <MaterialSymbol icon="edit" className="icon-md" />
-                  </button>
-                  <button type="button" class="text-green-600 hover:text-green-800" onClick={() => handleAddMember(project)} title="Agregar Miembro">
-                    <MaterialSymbol icon="person_add" className="icon-md" />
-                  </button>
-                  <button type="button" class="text-red-600 hover:text-red-800" onClick={() => handleDeleteProject(project.ID)} title="Eliminar">
-                    <MaterialSymbol icon="delete" className="icon-md" />
-                  </button>
-                </div>
+                 <div class="flex justify-end space-x-2">
+                   <button type="button" class="text-blue-600 hover:text-blue-800" onClick={() => handleEditProject(project)} title="Editar">
+                     <MaterialSymbol icon="edit" className="icon-md" />
+                   </button>
+                   <button type="button" class="text-green-600 hover:text-green-800" onClick={() => handleAddMember(project)} title="Agregar Miembro">
+                     <MaterialSymbol icon="person_add" className="icon-md" />
+                   </button>
+                   <button type="button" class="text-purple-600 hover:text-purple-800" onClick={() => handleViewMembers(project)} title="Ver Miembros">
+                     <MaterialSymbol icon="group" className="icon-md" />
+                   </button>
+                   <button type="button" class="text-red-600 hover:text-red-800" onClick={() => handleDeleteProject(project.ID)} title="Eliminar">
+                     <MaterialSymbol icon="delete" className="icon-md" />
+                   </button>
+                 </div>
               </div>
             ))
           )}
