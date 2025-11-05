@@ -375,6 +375,37 @@ Deletes a project.
     -   `id` (uint): The ID of the project to delete.
 -   **Response (204 No Content)**
 
+#### GET /api/projects/:id/active-sprint
+
+Retrieves the currently active sprint for a project.
+
+-   **Path Parameters:**
+    -   `id` (uint): The ID of the project.
+-   **Response (200 OK):**
+
+    ```json
+    {
+        "ID": 1,
+        "Name": "Sprint 1",
+        "Goal": "Complete feature X",
+        "ProjectID": 1,
+        "Status": "active",
+        "StartDate": "2023-11-01T00:00:00Z",
+        "EndDate": "2023-11-15T23:59:59Z",
+        "CreatedByID": 1,
+        "CreatedAt": "2023-10-27T10:30:00Z",
+        "UpdatedAt": "2023-10-27T10:30:00Z"
+    }
+    ```
+
+-   **Response (404 Not Found):**
+
+    ```json
+    {
+        "error": "no active sprint found for this project"
+    }
+    ```
+
 #### GET /api/projects/:id/unassigned-users
 
 Retrieves a list of users who can be added to a project. This list excludes existing project members and any users with the 'admin' role.
@@ -590,6 +621,78 @@ Deletes a sprint.
 -   **Path Parameters:**
     -   `sprintId` (uint): The ID of the sprint.
 -   **Response (204 No Content)**
+
+#### GET /api/sprints/:sprintId/tasks
+
+Retrieves all tasks for a specific sprint with full relationships (user stories, assigned users, etc.).
+
+-   **Path Parameters:**
+    -   `sprintId` (uint): The ID of the sprint.
+-   **Response (200 OK):**
+
+    ```json
+    [
+        {
+            "ID": 1,
+            "Title": "Task 1",
+            "Description": "Implement user authentication",
+            "UserStoryID": 1,
+            "UserStory": {
+                "ID": 1,
+                "Title": "User Authentication",
+                "Description": "As a user, I want to authenticate",
+                "Priority": "high",
+                "Points": 5
+            },
+            "Status": "todo",
+            "AssignedToID": 2,
+            "AssignedTo": {
+                "ID": 2,
+                "Nombre": "Jane",
+                "ApellidoPaterno": "Doe",
+                "Correo": "jane@example.com"
+            },
+            "EstimatedHours": 8,
+            "SpentHours": 0,
+            "IsDeliverable": false,
+            "CreatedAt": "2023-10-27T10:55:00Z",
+            "UpdatedAt": "2023-10-27T10:55:00Z"
+        }
+    ]
+    ```
+
+#### PUT /api/sprints/:sprintId/status
+
+Updates the status of a sprint (planned/active/completed/cancelled).
+
+-   **Path Parameters:**
+    -   `sprintId` (uint): The ID of the sprint.
+-   **Request Body:**
+
+    ```json
+    {
+        "status": "active"
+    }
+    ```
+
+    Valid status values: `planned`, `active`, `completed`, `cancelled`
+
+-   **Response (200 OK):**
+
+    ```json
+    {
+        "ID": 1,
+        "Name": "Sprint 1",
+        "Goal": "Complete feature X",
+        "ProjectID": 1,
+        "Status": "active",
+        "StartDate": "2023-11-01T00:00:00Z",
+        "EndDate": "2023-11-15T23:59:59Z",
+        "CreatedByID": 1,
+        "CreatedAt": "2023-10-27T10:30:00Z",
+        "UpdatedAt": "2023-10-27T10:35:00Z"
+    }
+    ```
 
 #### POST /api/sprints/:sprintId/userstories
 

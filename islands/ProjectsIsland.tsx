@@ -558,6 +558,9 @@ export default function ProjectsIsland() {
                    <button type="button" class="text-purple-600 hover:text-purple-800" onClick={() => handleViewMembers(project)} title="Ver Miembros">
                      <MaterialSymbol icon="group" className="icon-md" />
                    </button>
+                   <a href={`/dashboard/kanban?projectId=${project.ID}`} class="text-indigo-600 hover:text-indigo-800" title="Abrir Kanban">
+                     <MaterialSymbol icon="view_kanban" className="icon-md" />
+                   </a>
                    <button type="button" class="text-red-600 hover:text-red-800" onClick={() => handleDeleteProject(project.ID)} title="Eliminar">
                      <MaterialSymbol icon="delete" className="icon-md" />
                    </button>
