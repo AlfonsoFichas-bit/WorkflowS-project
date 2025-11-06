@@ -12,7 +12,7 @@ interface MaterialSymbolProps extends JSX.HTMLAttributes<HTMLSpanElement> {
 
 /**
  * Componente para renderizar iconos de Material Symbols con control sobre los ejes de la fuente variable
- * 
+ *
  * @param icon - Nombre del icono de Material Symbols
  * @param fill - Eje FILL (0 o 1)
  * @param weight - Eje wght (100-700)
@@ -31,7 +31,8 @@ export function MaterialSymbol({
   ...props
 }: MaterialSymbolProps) {
   // Construir el estilo para los ejes de la fuente variable
-  const fontVariationSettings = `'FILL' ${fill}, 'wght' ${weight}, 'GRAD' ${grade}, 'opsz' ${opticalSize}`;
+  const fontVariationSettings =
+    `'FILL' ${fill}, 'wght' ${weight}, 'GRAD' ${grade}, 'opsz' ${opticalSize}`;
 
   return (
     <span

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import Modal from "../components/Modal.tsx";
 import { MaterialSymbol } from "../components/MaterialSymbol.tsx";
 
@@ -112,20 +112,23 @@ export default function UserManagementIsland() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/admin/users/${editingUser.ID}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+      const response = await fetch(
+        `http://localhost:8080/api/admin/users/${editingUser.ID}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            Nombre: nombre,
+            ApellidoPaterno: apellidoPaterno,
+            ApellidoMaterno: apellidoMaterno,
+            Correo: correo,
+            ...(contraseña && { Contraseña: contraseña }), // Solo si se cambia
+          }),
         },
-        body: JSON.stringify({
-          Nombre: nombre,
-          ApellidoPaterno: apellidoPaterno,
-          ApellidoMaterno: apellidoMaterno,
-          Correo: correo,
-          ...(contraseña && { Contraseña: contraseña }), // Solo si se cambia
-        }),
-      });
+      );
 
       if (response.ok) {
         setMessage("Usuario actualizado exitosamente");
@@ -154,12 +157,15 @@ export default function UserManagementIsland() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/admin/users/${userId}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${token}`,
+      const response = await fetch(
+        `http://localhost:8080/api/admin/users/${userId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (response.ok) {
         setMessage("Usuario eliminado exitosamente");
@@ -181,8 +187,9 @@ export default function UserManagementIsland() {
   }, [isAdmin]);
 
   useEffect(() => {
-    const filtered = users.filter(user =>
-      `${user.Nombre} ${user.ApellidoPaterno} ${user.ApellidoMaterno}`.toLowerCase().includes(search.toLowerCase()) ||
+    const filtered = users.filter((user) =>
+      `${user.Nombre} ${user.ApellidoPaterno} ${user.ApellidoMaterno}`
+        .toLowerCase().includes(search.toLowerCase()) ||
       user.Correo.toLowerCase().includes(search.toLowerCase()) ||
       user.Role.toLowerCase().includes(search.toLowerCase())
     );
@@ -192,7 +199,10 @@ export default function UserManagementIsland() {
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedUsers = filteredUsers.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
 
   const handleCreateUser = async (e: Event) => {
     e.preventDefault();
@@ -246,8 +256,12 @@ export default function UserManagementIsland() {
   if (!isAdmin) {
     return (
       <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">Gestión de Usuarios</h2>
-        <p class="text-gray-600 dark:text-gray-400">Acceso denegado. Solo administradores pueden gestionar usuarios.</p>
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
+          Gestión de Usuarios
+        </h2>
+        <p class="text-gray-600 dark:text-gray-400">
+          Acceso denegado. Solo administradores pueden gestionar usuarios.
+        </p>
       </div>
     );
   }
@@ -255,7 +269,9 @@ export default function UserManagementIsland() {
   return (
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Gestión de Usuarios</h2>
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+          Gestión de Usuarios
+        </h2>
         <button
           type="button"
           class="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary/90 transition duration-300"
@@ -280,60 +296,92 @@ export default function UserManagementIsland() {
         onClose={() => setShowModal(false)}
       >
         <div class="p-6">
-          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Crear Nuevo Usuario</h2>
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+            Crear Nuevo Usuario
+          </h2>
           <form onSubmit={handleCreateUser}>
             <div class="mb-4">
-               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="nombre">Nombre</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="nombre"
+              >
+                Nombre
+              </label>
               <input
-                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="nombre"
                 type="text"
                 value={nombre}
-                onChange={(e) => setNombre((e.target as HTMLInputElement).value)}
+                onChange={(e) =>
+                  setNombre((e.target as HTMLInputElement).value)}
                 required
               />
             </div>
             <div class="mb-4">
-               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="apellidoPaterno">Apellido Paterno</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="apellidoPaterno"
+              >
+                Apellido Paterno
+              </label>
               <input
-                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="apellidoPaterno"
                 type="text"
                 value={apellidoPaterno}
-                onChange={(e) => setApellidoPaterno((e.target as HTMLInputElement).value)}
+                onChange={(e) =>
+                  setApellidoPaterno((e.target as HTMLInputElement).value)}
                 required
               />
             </div>
             <div class="mb-4">
-               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="apellidoMaterno">Apellido Materno</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="apellidoMaterno"
+              >
+                Apellido Materno
+              </label>
               <input
-                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="apellidoMaterno"
                 type="text"
                 value={apellidoMaterno}
-                onChange={(e) => setApellidoMaterno((e.target as HTMLInputElement).value)}
+                onChange={(e) =>
+                  setApellidoMaterno((e.target as HTMLInputElement).value)}
                 required
               />
             </div>
             <div class="mb-4">
-               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="correo">Correo</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="correo"
+              >
+                Correo
+              </label>
               <input
-                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="correo"
                 type="email"
                 value={correo}
-                onChange={(e) => setCorreo((e.target as HTMLInputElement).value)}
+                onChange={(e) =>
+                  setCorreo((e.target as HTMLInputElement).value)}
                 required
               />
             </div>
             <div class="mb-4">
-               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="contraseña">Contraseña</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="contraseña"
+              >
+                Contraseña
+              </label>
               <input
-                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="contraseña"
                 type="password"
                 value={contraseña}
-                onChange={(e) => setContraseña((e.target as HTMLInputElement).value)}
+                onChange={(e) =>
+                  setContraseña((e.target as HTMLInputElement).value)}
                 required
               />
             </div>
@@ -356,64 +404,100 @@ export default function UserManagementIsland() {
         onClose={() => setShowEditModal(false)}
       >
         <div class="p-6">
-          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Editar Usuario</h2>
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+            Editar Usuario
+          </h2>
           <form onSubmit={handleUpdateUser}>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editNombre">Nombre</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="editNombre"
+              >
+                Nombre
+              </label>
               <input
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="editNombre"
                 type="text"
                 value={nombre}
-                onChange={(e) => setNombre((e.target as HTMLInputElement).value)}
+                onChange={(e) =>
+                  setNombre((e.target as HTMLInputElement).value)}
                 required
               />
             </div>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editApellidoPaterno">Apellido Paterno</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="editApellidoPaterno"
+              >
+                Apellido Paterno
+              </label>
               <input
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="editApellidoPaterno"
                 type="text"
                 value={apellidoPaterno}
-                onChange={(e) => setApellidoPaterno((e.target as HTMLInputElement).value)}
+                onChange={(e) =>
+                  setApellidoPaterno((e.target as HTMLInputElement).value)}
                 required
               />
             </div>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editApellidoMaterno">Apellido Materno</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="editApellidoMaterno"
+              >
+                Apellido Materno
+              </label>
               <input
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="editApellidoMaterno"
                 type="text"
                 value={apellidoMaterno}
-                onChange={(e) => setApellidoMaterno((e.target as HTMLInputElement).value)}
+                onChange={(e) =>
+                  setApellidoMaterno((e.target as HTMLInputElement).value)}
                 required
               />
             </div>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editCorreo">Correo</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="editCorreo"
+              >
+                Correo
+              </label>
               <input
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="editCorreo"
                 type="email"
                 value={correo}
-                onChange={(e) => setCorreo((e.target as HTMLInputElement).value)}
+                onChange={(e) =>
+                  setCorreo((e.target as HTMLInputElement).value)}
                 required
               />
             </div>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editContraseña">Nueva Contraseña (opcional)</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="editContraseña"
+              >
+                Nueva Contraseña (opcional)
+              </label>
               <input
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="editContraseña"
                 type="password"
                 value={contraseña}
-                onChange={(e) => setContraseña((e.target as HTMLInputElement).value)}
+                onChange={(e) =>
+                  setContraseña((e.target as HTMLInputElement).value)}
                 placeholder="Deja vacío para no cambiar"
               />
             </div>
-            {message && <p class="text-red-500 dark:text-red-400 text-sm mb-4">{message}</p>}
+            {message && (
+              <p class="text-red-500 dark:text-red-400 text-sm mb-4">
+                {message}
+              </p>
+            )}
             <button
               type="submit"
               class="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary/90 transition duration-300 disabled:opacity-50"
@@ -426,7 +510,9 @@ export default function UserManagementIsland() {
       </Modal>
 
       <div class="mt-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Lista de Usuarios</h3>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+          Lista de Usuarios
+        </h3>
 
         {/* Search Input */}
         <div class="mb-4">
@@ -452,32 +538,62 @@ export default function UserManagementIsland() {
             </thead>
 
             <tbody class="divide-y divide-gray-200 *:even:bg-gray-50 dark:divide-gray-700 dark:*:even:bg-gray-800">
-              {loadingUsers ? (
-                <tr>
-                  <td colspan={5} class="px-3 py-2 text-center text-gray-500 dark:text-gray-400">Cargando usuarios...</td>
-                </tr>
-              ) : users.length === 0 ? (
-                <tr>
-                  <td colspan={5} class="px-3 py-2 text-center text-gray-500 dark:text-gray-400">No hay usuarios registrados.</td>
-                </tr>
-              ) : (
-                paginatedUsers.map((user) => (
-                  <tr key={user.ID} class="*:text-gray-900 *:first:font-medium dark:*:text-white">
-                    <td class="px-3 py-2 whitespace-nowrap">{user.ID}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">{`${user.Nombre} ${user.ApellidoPaterno} ${user.ApellidoMaterno}`.trim()}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">{user.Correo}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">{user.Role}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">
-                      <button type="button" class="text-blue-600 hover:text-blue-800 mr-2" onClick={() => handleEditUser(user)} title="Editar">
-                        <MaterialSymbol icon="edit" className="icon-md" />
-                      </button>
-                      <button type="button" class="text-red-600 hover:text-red-800" onClick={() => handleDeleteUser(user.ID)} title="Eliminar">
-                        <MaterialSymbol icon="delete" className="icon-md" />
-                      </button>
+              {loadingUsers
+                ? (
+                  <tr>
+                    <td
+                      colspan={5}
+                      class="px-3 py-2 text-center text-gray-500 dark:text-gray-400"
+                    >
+                      Cargando usuarios...
                     </td>
                   </tr>
-                ))
-              )}
+                )
+                : users.length === 0
+                ? (
+                  <tr>
+                    <td
+                      colspan={5}
+                      class="px-3 py-2 text-center text-gray-500 dark:text-gray-400"
+                    >
+                      No hay usuarios registrados.
+                    </td>
+                  </tr>
+                )
+                : (
+                  paginatedUsers.map((user) => (
+                    <tr
+                      key={user.ID}
+                      class="*:text-gray-900 *:first:font-medium dark:*:text-white"
+                    >
+                      <td class="px-3 py-2 whitespace-nowrap">{user.ID}</td>
+                      <td class="px-3 py-2 whitespace-nowrap">
+                        {`${user.Nombre} ${user.ApellidoPaterno} ${user.ApellidoMaterno}`
+                          .trim()}
+                      </td>
+                      <td class="px-3 py-2 whitespace-nowrap">{user.Correo}</td>
+                      <td class="px-3 py-2 whitespace-nowrap">{user.Role}</td>
+                      <td class="px-3 py-2 whitespace-nowrap">
+                        <button
+                          type="button"
+                          class="text-blue-600 hover:text-blue-800 mr-2"
+                          onClick={() => handleEditUser(user)}
+                          title="Editar"
+                        >
+                          <MaterialSymbol icon="edit" className="icon-md" />
+                        </button>
+                        <button
+                          type="button"
+                          class="text-red-600 hover:text-red-800"
+                          onClick={() => handleDeleteUser(user.ID)}
+                          title="Eliminar"
+                        >
+                          <MaterialSymbol icon="delete" className="icon-md" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
             </tbody>
           </table>
         </div>

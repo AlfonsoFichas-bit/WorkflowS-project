@@ -2,7 +2,10 @@
 export function useIsMobile(): boolean {
   // In a server-side rendering environment like Fresh, we need to handle this differently
   // For simplicity, we'll return false by default
-  if (typeof globalThis === "undefined" || typeof globalThis.innerWidth === "undefined") {
+  if (
+    typeof globalThis === "undefined" ||
+    typeof globalThis.innerWidth === "undefined"
+  ) {
     return false;
   }
 

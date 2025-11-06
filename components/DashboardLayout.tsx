@@ -13,10 +13,18 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({
   children,
-  user = { name: "Usuario", email: "usuario@example.com", role: "team_developer", formattedRole: "Team Developer" }
+  user = {
+    name: "Usuario",
+    email: "usuario@example.com",
+    role: "team_developer",
+    formattedRole: "Team Developer",
+  },
 }: DashboardLayoutProps) {
   return (
-    <div id="dashboard-container" class={`min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}>
+    <div
+      id="dashboard-container"
+      class={`min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300`}
+    >
       <SidebarIsland user={user} />
 
       {/* El main se ajustará automáticamente gracias a las clases CSS que añadimos */}

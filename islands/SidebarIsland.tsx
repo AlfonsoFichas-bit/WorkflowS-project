@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import { useIsMobile } from "../utils/hooks.ts";
 import { MaterialSymbol } from "../components/MaterialSymbol.tsx";
 
@@ -80,12 +80,14 @@ export default function SidebarIsland({
 
         if (response.ok) {
           const userData: User = await response.json();
-          const fullName = `${userData.Nombre} ${userData.ApellidoPaterno}`.trim();
+          const fullName = `${userData.Nombre} ${userData.ApellidoPaterno}`
+            .trim();
           setUser({
             name: fullName,
             email: userData.Correo,
             role: userData.Role,
-            formattedRole: userData.Role.charAt(0).toUpperCase() + userData.Role.slice(1).replace("_", " "),
+            formattedRole: userData.Role.charAt(0).toUpperCase() +
+              userData.Role.slice(1).replace("_", " "),
           });
         } else {
           console.error("Failed to fetch user data");
@@ -204,7 +206,11 @@ export default function SidebarIsland({
                       data-spa-link
                       className="flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400"
                     >
-                      <MaterialSymbol icon="dashboard" className="icon-md" fill={1} />
+                      <MaterialSymbol
+                        icon="dashboard"
+                        className="icon-md"
+                        fill={1}
+                      />
                       <span>Dashboard</span>
                     </a>
                     <a
@@ -250,17 +256,21 @@ export default function SidebarIsland({
                   </nav>
                 </div>
 
-                 <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-                   <div className="flex items-center gap-3 mb-4">
-                     <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold">
-                       {loading ? "..." : user.name.charAt(0)}
-                     </div>
-                     <div className="flex-grow">
-                       <p className="font-medium text-gray-900 dark:text-gray-100">{loading ? "Cargando..." : user.name}</p>
-                       <p className="text-sm text-gray-500 dark:text-gray-400">
-                         {loading ? "Cargando..." : (user.formattedRole || user.role)}
-                       </p>
-                     </div>
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold">
+                      {loading ? "..." : user.name.charAt(0)}
+                    </div>
+                    <div className="flex-grow">
+                      <p className="font-medium text-gray-900 dark:text-gray-100">
+                        {loading ? "Cargando..." : user.name}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {loading
+                          ? "Cargando..."
+                          : (user.formattedRole || user.role)}
+                      </p>
+                    </div>
                     <button
                       type="button"
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
@@ -283,14 +293,18 @@ export default function SidebarIsland({
                         <MaterialSymbol icon="person" className="icon-md" />
                         <span>Perfil</span>
                       </a>
-                       <button
-                         type="button"
-                         onClick={handleLogout}
-                         className="flex items-center gap-3 rounded-md p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 ease-in-out w-full text-left"
-                       >
-                         <MaterialSymbol icon="logout" className="icon-md" fill={1} />
-                         <span>Cerrar Sesión</span>
-                       </button>
+                      <button
+                        type="button"
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 rounded-md p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 ease-in-out w-full text-left"
+                      >
+                        <MaterialSymbol
+                          icon="logout"
+                          className="icon-md"
+                          fill={1}
+                        />
+                        <span>Cerrar Sesión</span>
+                      </button>
                     </div>
                   )}
                 </div>
@@ -304,20 +318,27 @@ export default function SidebarIsland({
 
   return (
     <div
-      className={`fixed inset-y-0 left-0 z-30 flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out ${isCollapsed ? "w-16" : "w-64"}`}
+      className={`fixed inset-y-0 left-0 z-30 flex flex-col bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 ease-in-out ${
+        isCollapsed ? "w-16" : "w-64"
+      }`}
     >
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between transition-all duration-300 ease-in-out">
-        {!isCollapsed ? (
-          <h2 className="text-xl font-bold text-blue-600 transition-opacity duration-300 ease-in-out">
-            WorkflowS
-          </h2>
-        ) : (
-          <div className="w-0 opacity-0 transition-all duration-300 ease-in-out"></div>
-        )}
+        {!isCollapsed
+          ? (
+            <h2 className="text-xl font-bold text-blue-600 transition-opacity duration-300 ease-in-out">
+              WorkflowS
+            </h2>
+          )
+          : (
+            <div className="w-0 opacity-0 transition-all duration-300 ease-in-out">
+            </div>
+          )}
         <button
           type="button"
           onClick={toggleSidebar}
-          className={`p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out ${isCollapsed ? "mx-auto" : "ml-auto"}`}
+          className={`p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 ease-in-out ${
+            isCollapsed ? "mx-auto" : "ml-auto"
+          }`}
         >
           <MaterialSymbol
             icon={isCollapsed ? "chevron_right" : "chevron_left"}
@@ -332,12 +353,16 @@ export default function SidebarIsland({
           <a
             href="/dashboard"
             data-spa-link
-            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${
+              isCollapsed ? "justify-center px-1.5" : ""
+            }`}
             title={isCollapsed ? "Dashboard" : undefined}
           >
             <MaterialSymbol
               icon="dashboard"
-              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              className={`icon-md transition-all duration-300 ease-in-out ${
+                isCollapsed ? "icon-lg" : ""
+              }`}
               fill={1}
               weight={500}
             />
@@ -350,12 +375,16 @@ export default function SidebarIsland({
           <a
             href="/dashboard/projects"
             data-spa-link
-            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${
+              isCollapsed ? "justify-center px-1.5" : ""
+            }`}
             title={isCollapsed ? "Proyectos" : undefined}
           >
             <MaterialSymbol
               icon="folder"
-              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              className={`icon-md transition-all duration-300 ease-in-out ${
+                isCollapsed ? "icon-lg" : ""
+              }`}
               weight={500}
             />
             {!isCollapsed && (
@@ -367,12 +396,16 @@ export default function SidebarIsland({
           <a
             href="/dashboard/tasks"
             data-spa-link
-            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${
+              isCollapsed ? "justify-center px-1.5" : ""
+            }`}
             title={isCollapsed ? "Tareas" : undefined}
           >
             <MaterialSymbol
               icon="task"
-              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              className={`icon-md transition-all duration-300 ease-in-out ${
+                isCollapsed ? "icon-lg" : ""
+              }`}
               weight={500}
             />
             {!isCollapsed && (
@@ -384,12 +417,16 @@ export default function SidebarIsland({
           <a
             href="/dashboard/team"
             data-spa-link
-            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${
+              isCollapsed ? "justify-center px-1.5" : ""
+            }`}
             title={isCollapsed ? "Equipo" : undefined}
           >
             <MaterialSymbol
               icon="group"
-              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              className={`icon-md transition-all duration-300 ease-in-out ${
+                isCollapsed ? "icon-lg" : ""
+              }`}
               weight={500}
             />
             {!isCollapsed && (
@@ -401,12 +438,16 @@ export default function SidebarIsland({
           <a
             href="/dashboard/users"
             data-spa-link
-            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${
+              isCollapsed ? "justify-center px-1.5" : ""
+            }`}
             title={isCollapsed ? "Usuarios" : undefined}
           >
             <MaterialSymbol
               icon="person"
-              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              className={`icon-md transition-all duration-300 ease-in-out ${
+                isCollapsed ? "icon-lg" : ""
+              }`}
               weight={500}
             />
             {!isCollapsed && (
@@ -418,12 +459,16 @@ export default function SidebarIsland({
           <a
             href="/dashboard/icons"
             data-spa-link
-            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${isCollapsed ? "justify-center px-1.5" : ""}`}
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${
+              isCollapsed ? "justify-center px-1.5" : ""
+            }`}
             title={isCollapsed ? "Iconos" : undefined}
           >
             <MaterialSymbol
               icon="palette"
-              className={`icon-md transition-all duration-300 ease-in-out ${isCollapsed ? "icon-lg" : ""}`}
+              className={`icon-md transition-all duration-300 ease-in-out ${
+                isCollapsed ? "icon-lg" : ""
+              }`}
               weight={500}
             />
             {!isCollapsed && (
@@ -453,17 +498,17 @@ export default function SidebarIsland({
                 <MaterialSymbol icon="person" className="icon-md" />
                 <span>Perfil</span>
               </a>
-               <button
-                 type="button"
-                 onClick={() => {
-                   handleLogout();
-                   setIsUserMenuOpen(false);
-                 }}
-                 className="flex items-center gap-3 rounded-md p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 ease-in-out w-full text-left"
-               >
-                 <MaterialSymbol icon="logout" className="icon-md" fill={1} />
-                 <span>Cerrar Sesión</span>
-               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  handleLogout();
+                  setIsUserMenuOpen(false);
+                }}
+                className="flex items-center gap-3 rounded-md p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-300 ease-in-out w-full text-left"
+              >
+                <MaterialSymbol icon="logout" className="icon-md" fill={1} />
+                <span>Cerrar Sesión</span>
+              </button>
             </div>
           </div>
         )}
@@ -477,19 +522,19 @@ export default function SidebarIsland({
           }`}
           title="Menú de usuario"
         >
-           <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold transition-all duration-300 ease-in-out">
-             {loading ? "..." : user.name.charAt(0)}
-           </div>
-           {!isCollapsed && (
-             <>
-               <div className="flex-grow transition-all duration-300 ease-in-out">
-                 <p className="font-medium text-gray-900 dark:text-gray-100 transition-all duration-300 ease-in-out">
-                   {loading ? "Cargando..." : user.name}
-                 </p>
-                 <p className="text-sm text-gray-500 dark:text-gray-400 transition-all duration-300 ease-in-out">
-                   {loading ? "Cargando..." : (user.formattedRole || user.role)}
-                 </p>
-               </div>
+          <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-800 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold transition-all duration-300 ease-in-out">
+            {loading ? "..." : user.name.charAt(0)}
+          </div>
+          {!isCollapsed && (
+            <>
+              <div className="flex-grow transition-all duration-300 ease-in-out">
+                <p className="font-medium text-gray-900 dark:text-gray-100 transition-all duration-300 ease-in-out">
+                  {loading ? "Cargando..." : user.name}
+                </p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 transition-all duration-300 ease-in-out">
+                  {loading ? "Cargando..." : (user.formattedRole || user.role)}
+                </p>
+              </div>
               <MaterialSymbol
                 icon={isUserMenuOpen ? "expand_less" : "expand_more"}
                 className="icon-md"

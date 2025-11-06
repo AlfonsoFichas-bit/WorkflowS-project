@@ -17,21 +17,25 @@ export function Breadcrumbs({ breadcrumbs }: BreadcrumbsProps) {
           const isLast = index === breadcrumbs.length - 1;
           return (
             <li key={index} class={isLast ? "" : "relative flex items-center"}>
-              {isLast ? (
-                <span class="block h-10 bg-gray-100 px-4 leading-10 dark:bg-gray-700">
-                  {item.title}
-                </span>
-              ) : (
-                <>
-                  <a
-                    href={item.href}
-                    class="block h-10 bg-gray-100 px-4 leading-10 transition-colors hover:text-gray-900 dark:bg-gray-700 dark:hover:text-white"
-                  >
+              {isLast
+                ? (
+                  <span class="block h-10 bg-gray-100 px-4 leading-10 dark:bg-gray-700">
                     {item.title}
-                  </a>
-                  <span class="absolute inset-y-0 -start-px h-10 w-4 bg-gray-100 flex items-center justify-center text-gray-500 dark:bg-gray-700 dark:text-gray-400">▶</span>
-                </>
-              )}
+                  </span>
+                )
+                : (
+                  <>
+                    <a
+                      href={item.href}
+                      class="block h-10 bg-gray-100 px-4 leading-10 transition-colors hover:text-gray-900 dark:bg-gray-700 dark:hover:text-white"
+                    >
+                      {item.title}
+                    </a>
+                    <span class="absolute inset-y-0 -start-px h-10 w-4 bg-gray-100 flex items-center justify-center text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                      ▶
+                    </span>
+                  </>
+                )}
             </li>
           );
         })}

@@ -48,7 +48,9 @@ async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
 
 async function getActiveSprint(projectId: number): Promise<Sprint | null> {
   try {
-    return await apiFetch<Sprint>(`${API_BASE}/api/projects/${projectId}/active-sprint`);
+    return await apiFetch<Sprint>(
+      `${API_BASE}/api/projects/${projectId}/active-sprint`,
+    );
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     if (msg.includes("404")) return null;
@@ -60,19 +62,26 @@ function getSprintTasks(sprintId: number): Promise<Task[]> {
   return apiFetch<Task[]>(`${API_BASE}/api/sprints/${sprintId}/tasks`);
 }
 
-function updateTaskStatus(taskId: number, status: Task["Status"]): Promise<Task> {
+function updateTaskStatus(
+  taskId: number,
+  status: Task["Status"],
+): Promise<Task> {
   return apiFetch<Task>(`${API_BASE}/api/tasks/${taskId}/status`, {
     method: "PUT",
     body: JSON.stringify({ status }),
   });
 }
 
-export default function KanbanBoardIsland({ projectId }: { projectId: number }) {
+export default function KanbanBoardIsland(
+  { projectId }: { projectId: number },
+) {
   const [sprint, setSprint] = useState<Sprint | null>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [_connectionStatus, setConnectionStatus] = useState<string>("disconnected");
+  const [_connectionStatus, setConnectionStatus] = useState<string>(
+    "disconnected",
+  );
 
   const columns = useMemo(
     () => [
@@ -120,12 +129,18 @@ export default function KanbanBoardIsland({ projectId }: { projectId: number }) 
 
       ws.on("task_status_updated", (payload) => {
         const p = payload as { taskId: number; newStatus: Task["Status"] };
-        setTasks((prev) => prev.map((t) => (t.ID === p.taskId ? { ...t, Status: p.newStatus } : t)));
+        setTasks((prev) =>
+          prev.map((
+            t,
+          ) => (t.ID === p.taskId ? { ...t, Status: p.newStatus } : t))
+        );
       });
 
       ws.on("task_updated", (payload) => {
         const p = payload as { taskId: number; changes: Partial<Task> };
-        setTasks((prev) => prev.map((t) => (t.ID === p.taskId ? { ...t, ...p.changes } : t)));
+        setTasks((prev) =>
+          prev.map((t) => (t.ID === p.taskId ? { ...t, ...p.changes } : t))
+        );
       });
 
       ws.on("task_created", (payload) => {
@@ -163,13 +178,17 @@ export default function KanbanBoardIsland({ projectId }: { projectId: number }) 
     if (!current || current.Status === status) return;
 
     // optimistic update
-    setTasks((prev) => prev.map((t) => (t.ID === id ? { ...t, Status: status } : t)));
+    setTasks((prev) =>
+      prev.map((t) => (t.ID === id ? { ...t, Status: status } : t))
+    );
     try {
       const updated = await updateTaskStatus(id, status);
       setTasks((prev) => prev.map((t) => (t.ID === id ? updated : t)));
     } catch (_err) {
       // rollback
-      setTasks((prev) => prev.map((t) => (t.ID === id ? { ...t, Status: current.Status } : t)));
+      setTasks((prev) =>
+        prev.map((t) => (t.ID === id ? { ...t, Status: current.Status } : t))
+      );
     }
   };
 
@@ -185,11 +204,13 @@ export default function KanbanBoardIsland({ projectId }: { projectId: number }) 
     <div class="flex flex-col gap-4">
       <div class="flex items-center justify-between">
         <h2 class="text-xl font-semibold">Kanban</h2>
-        {sprint ? (
-          <span class="text-sm text-gray-600">Sprint activo: {sprint.Name} (#{sprint.ID})</span>
-        ) : (
-          <span class="text-sm text-gray-600">No hay sprint activo</span>
-        )}
+        {sprint
+          ? (
+            <span class="text-sm text-gray-600">
+              Sprint activo: {sprint.Name} (#{sprint.ID})
+            </span>
+          )
+          : <span class="text-sm text-gray-600">No hay sprint activo</span>}
       </div>
 
       <div class="flex gap-4 overflow-x-auto">
@@ -198,7 +219,8 @@ export default function KanbanBoardIsland({ projectId }: { projectId: number }) 
             key={col.id}
             class="min-w-[280px] w-full bg-gray-50 dark:bg-gray-800 rounded-md p-3 border border-gray-200 dark:border-gray-700"
             onDragOver={(e) => e.preventDefault()}
-            onDrop={(e) => onDropTo(e as unknown as DragEvent, col.status as Task["Status"]) }
+            onDrop={(e) =>
+              onDropTo(e as unknown as DragEvent, col.status as Task["Status"])}
           >
             <div class="font-medium mb-2">{col.title}</div>
             <div class="space-y-2">
@@ -209,11 +231,14 @@ export default function KanbanBoardIsland({ projectId }: { projectId: number }) 
                     key={t.ID}
                     class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded p-3 cursor-move"
                     draggable
-                    onDragStart={(e) => onDragStart(e as unknown as DragEvent, t.ID)}
+                    onDragStart={(e) =>
+                      onDragStart(e as unknown as DragEvent, t.ID)}
                   >
                     <div class="font-semibold text-sm">{t.Title}</div>
                     {t.Description && (
-                      <div class="text-xs text-gray-600 mt-1 line-clamp-3">{t.Description}</div>
+                      <div class="text-xs text-gray-600 mt-1 line-clamp-3">
+                        {t.Description}
+                      </div>
                     )}
                     <div class="flex items-center justify-between mt-2 text-xs">
                       {t.UserStory?.Priority && (

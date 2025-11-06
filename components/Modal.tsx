@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "preact/hooks";
+import { useEffect, useRef, useState } from "preact/hooks";
 
 interface ModalProps {
   show: boolean;
@@ -60,19 +60,26 @@ export default function Modal({
       ref={dialogRef}
       class="z-50 m-0 min-h-full min-w-full overflow-y-auto bg-transparent backdrop:bg-transparent"
     >
-      <div class="fixed inset-0 overflow-y-auto px-4 py-6 sm:px-0 z-50" scroll-region>
+      <div
+        class="fixed inset-0 overflow-y-auto px-4 py-6 sm:px-0 z-50"
+        scroll-region
+      >
         <div
-          class={`fixed inset-0 transform transition-all ${show ? "opacity-100" : "opacity-0"}`}
+          class={`fixed inset-0 transform transition-all ${
+            show ? "opacity-100" : "opacity-0"
+          }`}
           onClick={closeable ? onClose : undefined}
         >
           <div class="absolute inset-0 bg-gray-500 dark:bg-black opacity-75 dark:opacity-75" />
         </div>
 
-         <div
-           class={`mb-6 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-xl dark:shadow-2xl transform transition-all sm:w-full sm:mx-auto ${maxWidthClass} ${
-             show ? "opacity-100 translate-y-0 sm:scale-100" : "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-           }`}
-         >
+        <div
+          class={`mb-6 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-xl dark:shadow-2xl transform transition-all sm:w-full sm:mx-auto ${maxWidthClass} ${
+            show
+              ? "opacity-100 translate-y-0 sm:scale-100"
+              : "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+          }`}
+        >
           {showSlot && children}
         </div>
       </div>

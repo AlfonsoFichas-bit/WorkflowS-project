@@ -17,11 +17,13 @@ export default define.page(function KanbanPage(req) {
           <div class="mb-4 flex items-center justify-between">
             <h1 class="text-2xl font-semibold">Tablero Kanban</h1>
           </div>
-          {projectId ? (
-            <KanbanBoardIsland projectId={projectId} />
-          ) : (
-            <div class="text-gray-600">Seleccione un proyecto (parámetro projectId)</div>
-          )}
+          {projectId
+            ? <KanbanBoardIsland projectId={projectId} />
+            : (
+              <div class="text-gray-600">
+                Seleccione un proyecto (parámetro projectId)
+              </div>
+            )}
         </div>
       </DashboardLayout>
     </>

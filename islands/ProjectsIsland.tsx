@@ -1,4 +1,4 @@
-import { useState, useEffect } from "preact/hooks";
+import { useEffect, useState } from "preact/hooks";
 import Modal from "../components/Modal.tsx";
 import { MaterialSymbol } from "../components/MaterialSymbol.tsx";
 
@@ -101,18 +101,21 @@ export default function ProjectsIsland() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/projects/${editingProject.ID}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+      const response = await fetch(
+        `http://localhost:8080/api/projects/${editingProject.ID}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            Name: name,
+            Description: description,
+            Status: status,
+          }),
         },
-        body: JSON.stringify({
-          Name: name,
-          Description: description,
-          Status: status,
-        }),
-      });
+      );
 
       if (response.ok) {
         setMessage("Proyecto actualizado exitosamente");
@@ -132,7 +135,9 @@ export default function ProjectsIsland() {
   };
 
   const handleDeleteProject = async (projectId: number) => {
-    if (!confirm("¿Estás seguro de que quieres eliminar este proyecto?")) return;
+    if (!confirm("¿Estás seguro de que quieres eliminar este proyecto?")) {
+      return;
+    }
 
     const token = localStorage.getItem("token");
     if (!token) {
@@ -141,12 +146,15 @@ export default function ProjectsIsland() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/projects/${projectId}`, {
-        method: "DELETE",
-        headers: {
-          "Authorization": `Bearer ${token}`,
+      const response = await fetch(
+        `http://localhost:8080/api/projects/${projectId}`,
+        {
+          method: "DELETE",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (response.ok) {
         setMessage("Proyecto eliminado exitosamente");
@@ -205,21 +213,21 @@ export default function ProjectsIsland() {
     }
   };
 
-   const handleAddMember = (project: Project) => {
-     setSelectedProject(project);
-     setSelectedUserId("");
-     setMemberRole("");
-     setMessage("");
-     setShowAddMemberModal(true);
-     fetchUsers(project.ID);
-   };
+  const handleAddMember = (project: Project) => {
+    setSelectedProject(project);
+    setSelectedUserId("");
+    setMemberRole("");
+    setMessage("");
+    setShowAddMemberModal(true);
+    fetchUsers(project.ID);
+  };
 
-   const handleViewMembers = (project: Project) => {
-     setSelectedProject(project);
-     setMessage("");
-     setShowMembersModal(true);
-     fetchMembers(project.ID);
-   };
+  const handleViewMembers = (project: Project) => {
+    setSelectedProject(project);
+    setMessage("");
+    setShowMembersModal(true);
+    fetchMembers(project.ID);
+  };
 
   const handleSubmitAddMember = async (e: Event) => {
     e.preventDefault();
@@ -236,17 +244,20 @@ export default function ProjectsIsland() {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/admin/projects/${selectedProject.ID}/members`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+      const response = await fetch(
+        `http://localhost:8080/api/admin/projects/${selectedProject.ID}/members`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            userId: selectedUserId,
+            role: memberRole,
+          }),
         },
-        body: JSON.stringify({
-          userId: selectedUserId,
-          role: memberRole,
-        }),
-      });
+      );
 
       if (response.ok) {
         setMessage("Miembro agregado exitosamente");
@@ -264,60 +275,66 @@ export default function ProjectsIsland() {
     }
   };
 
-   useEffect(() => {
-     fetchProjects();
-   }, []);
+  useEffect(() => {
+    fetchProjects();
+  }, []);
 
-   const fetchUsers = async (projectId: number) => {
-     const token = localStorage.getItem("token");
-     if (!token) return;
+  const fetchUsers = async (projectId: number) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-     try {
-       const response = await fetch(`http://localhost:8080/api/projects/${projectId}/unassigned-users`, {
-         method: "GET",
-         headers: {
-           "Authorization": `Bearer ${token}`,
-           "Content-Type": "application/json",
-         },
-       });
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/projects/${projectId}/unassigned-users`,
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
-       if (response.ok) {
-         const usersData = await response.json();
-         setUsers(usersData);
-       } else {
-         console.error("Failed to fetch users");
-       }
-     } catch (error) {
-       console.error("Error fetching users:", error);
-     }
-   };
+      if (response.ok) {
+        const usersData = await response.json();
+        setUsers(usersData);
+      } else {
+        console.error("Failed to fetch users");
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
 
-   const fetchMembers = async (projectId: number) => {
-     const token = localStorage.getItem("token");
-     if (!token) return;
+  const fetchMembers = async (projectId: number) => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
 
-     try {
-       const response = await fetch(`http://localhost:8080/api/projects/${projectId}/members`, {
-         method: "GET",
-         headers: {
-           "Authorization": `Bearer ${token}`,
-           "Content-Type": "application/json",
-         },
-       });
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/projects/${projectId}/members`,
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        },
+      );
 
-       if (response.ok) {
-         const membersData = await response.json();
-         setMembers(membersData);
-       } else {
-         console.error("Failed to fetch members");
-       }
-     } catch (error) {
-       console.error("Error fetching members:", error);
-     }
-   };
+      if (response.ok) {
+        const membersData = await response.json();
+        setMembers(membersData);
+      } else {
+        console.error("Failed to fetch members");
+      }
+    } catch (error) {
+      console.error("Error fetching members:", error);
+    }
+  };
 
   useEffect(() => {
-    const filtered = projects.filter(project =>
+    const filtered = projects.filter((project) =>
       project.Name.toLowerCase().includes(search.toLowerCase()) ||
       project.Description.toLowerCase().includes(search.toLowerCase()) ||
       project.Status.toLowerCase().includes(search.toLowerCase())
@@ -328,12 +345,17 @@ export default function ProjectsIsland() {
 
   const totalPages = Math.ceil(filteredProjects.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedProjects = filteredProjects.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedProjects = filteredProjects.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
 
   return (
     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
       <div class="flex justify-between items-center mb-4">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">Gestión de Proyectos</h2>
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200">
+          Gestión de Proyectos
+        </h2>
         <button
           type="button"
           class="bg-primary text-white font-bold py-2 px-4 rounded-lg hover:bg-primary/90 transition duration-300"
@@ -356,10 +378,17 @@ export default function ProjectsIsland() {
         onClose={() => setShowModal(false)}
       >
         <div class="p-6">
-          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Crear Nuevo Proyecto</h2>
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+            Crear Nuevo Proyecto
+          </h2>
           <form onSubmit={handleCreateProject}>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="name">Nombre</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="name"
+              >
+                Nombre
+              </label>
               <input
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="name"
@@ -370,12 +399,18 @@ export default function ProjectsIsland() {
               />
             </div>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="description">Descripción</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="description"
+              >
+                Descripción
+              </label>
               <textarea
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="description"
                 value={description}
-                onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
+                onChange={(e) =>
+                  setDescription((e.target as HTMLInputElement).value)}
                 required
               />
             </div>
@@ -399,10 +434,17 @@ export default function ProjectsIsland() {
         onClose={() => setShowEditModal(false)}
       >
         <div class="p-6">
-          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Editar Proyecto</h2>
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+            Editar Proyecto
+          </h2>
           <form onSubmit={handleUpdateProject}>
             <div class="mb-4">
-              <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editName">Nombre</label>
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="editName"
+              >
+                Nombre
+              </label>
               <input
                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
                 id="editName"
@@ -412,17 +454,27 @@ export default function ProjectsIsland() {
                 required
               />
             </div>
-             <div class="mb-4">
-               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="editDescription">Descripción</label>
-               <textarea
-                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
-                 id="editDescription"
-                 value={description}
-                 onChange={(e) => setDescription((e.target as HTMLInputElement).value)}
-                 required
-               />
-             </div>
-            {message && <p class="text-red-500 dark:text-red-400 text-sm mb-4">{message}</p>}
+            <div class="mb-4">
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="editDescription"
+              >
+                Descripción
+              </label>
+              <textarea
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white"
+                id="editDescription"
+                value={description}
+                onChange={(e) =>
+                  setDescription((e.target as HTMLInputElement).value)}
+                required
+              />
+            </div>
+            {message && (
+              <p class="text-red-500 dark:text-red-400 text-sm mb-4">
+                {message}
+              </p>
+            )}
             <button
               type="submit"
               class="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary/90 transition duration-300 disabled:opacity-50"
@@ -432,91 +484,124 @@ export default function ProjectsIsland() {
             </button>
           </form>
         </div>
-       </Modal>
+      </Modal>
 
-       <Modal
-         show={showAddMemberModal}
-         maxWidth="lg"
-         closeable
-         onClose={() => setShowAddMemberModal(false)}
-       >
-         <div class="p-6">
-           <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Agregar Miembro a Proyecto</h2>
-           <form onSubmit={handleSubmitAddMember}>
-             <div class="mb-4">
-               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="user">Usuario</label>
-               <select
-                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary text-gray-900 dark:text-white"
-                 id="user"
-                 value={selectedUserId}
-                 onChange={(e) => setSelectedUserId(Number((e.target as HTMLSelectElement).value))}
-                 required
-               >
-                 <option value="">Seleccionar Usuario</option>
-                 {users.map((user) => (
-                   <option key={user.ID} value={user.ID}>
-                     {`${user.Nombre} ${user.ApellidoPaterno}`} ({user.Correo})
-                   </option>
-                 ))}
-               </select>
-             </div>
-             <div class="mb-4">
-               <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2" for="role">Rol</label>
-               <select
-                 class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary text-gray-900 dark:text-white"
-                 id="role"
-                 value={memberRole}
-                 onChange={(e) => setMemberRole((e.target as HTMLSelectElement).value)}
-                 required
-               >
-                 <option value="">Seleccionar Rol</option>
-                 <option value="scrum_master">Scrum Master</option>
-                 <option value="product_owner">Product Owner</option>
-                 <option value="team_developer">Team Developer</option>
-               </select>
-             </div>
-             {message && <p class="text-red-500 dark:text-red-400 text-sm mb-4">{message}</p>}
-             <button
-               type="submit"
-               class="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary/90 transition duration-300 disabled:opacity-50"
-               disabled={loading}
-             >
-               {loading ? "Agregando..." : "Agregar Miembro"}
-             </button>
-           </form>
-         </div>
-        </Modal>
+      <Modal
+        show={showAddMemberModal}
+        maxWidth="lg"
+        closeable
+        onClose={() => setShowAddMemberModal(false)}
+      >
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+            Agregar Miembro a Proyecto
+          </h2>
+          <form onSubmit={handleSubmitAddMember}>
+            <div class="mb-4">
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="user"
+              >
+                Usuario
+              </label>
+              <select
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary text-gray-900 dark:text-white"
+                id="user"
+                value={selectedUserId}
+                onChange={(e) =>
+                  setSelectedUserId(
+                    Number((e.target as HTMLSelectElement).value),
+                  )}
+                required
+              >
+                <option value="">Seleccionar Usuario</option>
+                {users.map((user) => (
+                  <option key={user.ID} value={user.ID}>
+                    {`${user.Nombre} ${user.ApellidoPaterno}`} ({user.Correo})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div class="mb-4">
+              <label
+                class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2"
+                for="role"
+              >
+                Rol
+              </label>
+              <select
+                class="w-full px-4 py-3 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-primary focus:border-primary text-gray-900 dark:text-white"
+                id="role"
+                value={memberRole}
+                onChange={(e) =>
+                  setMemberRole((e.target as HTMLSelectElement).value)}
+                required
+              >
+                <option value="">Seleccionar Rol</option>
+                <option value="scrum_master">Scrum Master</option>
+                <option value="product_owner">Product Owner</option>
+                <option value="team_developer">Team Developer</option>
+              </select>
+            </div>
+            {message && (
+              <p class="text-red-500 dark:text-red-400 text-sm mb-4">
+                {message}
+              </p>
+            )}
+            <button
+              type="submit"
+              class="w-full bg-primary text-white font-bold py-3 px-4 rounded-lg hover:bg-primary/90 transition duration-300 disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? "Agregando..." : "Agregar Miembro"}
+            </button>
+          </form>
+        </div>
+      </Modal>
 
-        <Modal
-          show={showMembersModal}
-          maxWidth="lg"
-          closeable
-          onClose={() => setShowMembersModal(false)}
-        >
-          <div class="p-6">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">Miembros del Proyecto</h2>
-            {members.length === 0 ? (
-              <p class="text-gray-600 dark:text-gray-400">No hay miembros en este proyecto.</p>
-            ) : (
+      <Modal
+        show={showMembersModal}
+        maxWidth="lg"
+        closeable
+        onClose={() => setShowMembersModal(false)}
+      >
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+            Miembros del Proyecto
+          </h2>
+          {members.length === 0
+            ? (
+              <p class="text-gray-600 dark:text-gray-400">
+                No hay miembros en este proyecto.
+              </p>
+            )
+            : (
               <div class="space-y-4">
                 {members.map((member) => (
-                  <div key={member.ID} class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                  <div
+                    key={member.ID}
+                    class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg"
+                  >
                     <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200">
                       {`${member.User.Nombre} ${member.User.ApellidoPaterno}`}
                     </h3>
-                    <p class="text-gray-600 dark:text-gray-400">{member.User.Correo}</p>
+                    <p class="text-gray-600 dark:text-gray-400">
+                      {member.User.Correo}
+                    </p>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
-                      Rol: {member.Role.replace('_', ' ').toUpperCase()}
+                      Rol: {member.Role.replace("_", " ").toUpperCase()}
                     </p>
                   </div>
                 ))}
               </div>
             )}
-          </div>
-        </Modal>
+        </div>
+      </Modal>
 
-        <div class="mt-6">
-        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Lista de Proyectos</h3>
+      <div class="mt-6">
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+          Lista de Proyectos
+        </h3>
 
         <div class="mb-4">
           <input
@@ -529,45 +614,91 @@ export default function ProjectsIsland() {
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {loadingProjects ? (
-            <div class="col-span-full text-center text-gray-500 dark:text-gray-400">Cargando proyectos...</div>
-          ) : projects.length === 0 ? (
-            <div class="col-span-full text-center text-gray-500 dark:text-gray-400">No hay proyectos registrados.</div>
-          ) : (
-            paginatedProjects.map((project) => (
-              <div key={project.ID} class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">{project.Name}</h3>
-                <p class="text-gray-600 dark:text-gray-400 mb-4">{project.Description}</p>
-                <div class="flex justify-between items-center mb-4">
-                  <span class={`px-2 py-1 rounded-full text-xs font-medium ${
-                    project.Status === 'planning' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                    project.Status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                    'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                  }`}>
-                    {project.Status.charAt(0).toUpperCase() + project.Status.slice(1)}
-                  </span>
-                  <span class="text-sm text-gray-500 dark:text-gray-400">ID: {project.ID}</span>
-                </div>
-                 <div class="flex justify-end space-x-2">
-                   <button type="button" class="text-blue-600 hover:text-blue-800" onClick={() => handleEditProject(project)} title="Editar">
-                     <MaterialSymbol icon="edit" className="icon-md" />
-                   </button>
-                   <button type="button" class="text-green-600 hover:text-green-800" onClick={() => handleAddMember(project)} title="Agregar Miembro">
-                     <MaterialSymbol icon="person_add" className="icon-md" />
-                   </button>
-                   <button type="button" class="text-purple-600 hover:text-purple-800" onClick={() => handleViewMembers(project)} title="Ver Miembros">
-                     <MaterialSymbol icon="group" className="icon-md" />
-                   </button>
-                   <a href={`/dashboard/kanban?projectId=${project.ID}`} class="text-indigo-600 hover:text-indigo-800" title="Abrir Kanban">
-                     <MaterialSymbol icon="view_kanban" className="icon-md" />
-                   </a>
-                   <button type="button" class="text-red-600 hover:text-red-800" onClick={() => handleDeleteProject(project.ID)} title="Eliminar">
-                     <MaterialSymbol icon="delete" className="icon-md" />
-                   </button>
-                 </div>
+          {loadingProjects
+            ? (
+              <div class="col-span-full text-center text-gray-500 dark:text-gray-400">
+                Cargando proyectos...
               </div>
-            ))
-          )}
+            )
+            : projects.length === 0
+            ? (
+              <div class="col-span-full text-center text-gray-500 dark:text-gray-400">
+                No hay proyectos registrados.
+              </div>
+            )
+            : (
+              paginatedProjects.map((project) => (
+                <div
+                  key={project.ID}
+                  class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700"
+                >
+                  <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">
+                    {project.Name}
+                  </h3>
+                  <p class="text-gray-600 dark:text-gray-400 mb-4">
+                    {project.Description}
+                  </p>
+                  <div class="flex justify-between items-center mb-4">
+                    <span
+                      class={`px-2 py-1 rounded-full text-xs font-medium ${
+                        project.Status === "planning"
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                          : project.Status === "active"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200"
+                      }`}
+                    >
+                      {project.Status.charAt(0).toUpperCase() +
+                        project.Status.slice(1)}
+                    </span>
+                    <span class="text-sm text-gray-500 dark:text-gray-400">
+                      ID: {project.ID}
+                    </span>
+                  </div>
+                  <div class="flex justify-end space-x-2">
+                    <button
+                      type="button"
+                      class="text-blue-600 hover:text-blue-800"
+                      onClick={() => handleEditProject(project)}
+                      title="Editar"
+                    >
+                      <MaterialSymbol icon="edit" className="icon-md" />
+                    </button>
+                    <button
+                      type="button"
+                      class="text-green-600 hover:text-green-800"
+                      onClick={() => handleAddMember(project)}
+                      title="Agregar Miembro"
+                    >
+                      <MaterialSymbol icon="person_add" className="icon-md" />
+                    </button>
+                    <button
+                      type="button"
+                      class="text-purple-600 hover:text-purple-800"
+                      onClick={() => handleViewMembers(project)}
+                      title="Ver Miembros"
+                    >
+                      <MaterialSymbol icon="group" className="icon-md" />
+                    </button>
+                    <a
+                      href={`/dashboard/kanban?projectId=${project.ID}`}
+                      class="text-indigo-600 hover:text-indigo-800"
+                      title="Abrir Kanban"
+                    >
+                      <MaterialSymbol icon="view_kanban" className="icon-md" />
+                    </a>
+                    <button
+                      type="button"
+                      class="text-red-600 hover:text-red-800"
+                      onClick={() => handleDeleteProject(project.ID)}
+                      title="Eliminar"
+                    >
+                      <MaterialSymbol icon="delete" className="icon-md" />
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
         </div>
 
         {totalPages > 1 && (

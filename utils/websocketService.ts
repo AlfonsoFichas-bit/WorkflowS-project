@@ -23,7 +23,10 @@ export class KanbanWebSocket {
 
       this.ws.onmessage = (event: MessageEvent) => {
         try {
-          const data = JSON.parse(event.data as string) as { type: string; payload: unknown };
+          const data = JSON.parse(event.data as string) as {
+            type: string;
+            payload: unknown;
+          };
           this.emit(data.type, data.payload);
           this.emit("message", data);
         } catch (_err) {
