@@ -3,6 +3,9 @@ import type { VNode } from "preact";
 import { Breadcrumbs } from "../components/Breadcrumbs.tsx";
 import UserManagementIsland from "./UserManagementIsland.tsx";
 import ProjectsIsland from "./ProjectsIsland.tsx";
+import SprintManagementIsland from "./SprintManagementIsland.tsx";
+import UserStoriesIsland from "./UserStoriesIsland.tsx";
+import TasksManagementIsland, { TasksProvider } from "./TasksManagementIsland.tsx";
 
 interface RouteDef {
   path: string; // e.g. "/dashboard", "/dashboard/projects"
@@ -85,12 +88,9 @@ export default function DashboardSpaIsland() {
               title: "Tareas",
             }]}
           />
-          <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">
-              Tareas
-            </h2>
-            <p class="text-gray-600 dark:text-gray-400">Gestión de tareas.</p>
-          </div>
+          <TasksProvider projectId="1" userRole="developer">
+            <TasksManagementIsland projectId="1" userRole="developer" />
+          </TasksProvider>
         </div>
       ),
     },
@@ -110,6 +110,34 @@ export default function DashboardSpaIsland() {
             </h2>
             <p class="text-gray-600 dark:text-gray-400">Gestión de equipo.</p>
           </div>
+        </div>
+      ),
+    },
+    {
+      path: "/dashboard/sprints",
+      title: "Sprints",
+      render: () => (
+        <div class="max-w-7xl mx-auto">
+          <Breadcrumbs
+            breadcrumbs={[{ title: "Dashboard", href: "/dashboard" }, {
+              title: "Sprints",
+            }]}
+          />
+          <SprintManagementIsland />
+        </div>
+      ),
+    },
+    {
+      path: "/dashboard/user-stories",
+      title: "User Stories",
+      render: () => (
+        <div class="max-w-7xl mx-auto">
+          <Breadcrumbs
+            breadcrumbs={[{ title: "Dashboard", href: "/dashboard" }, {
+              title: "User Stories",
+            }]}
+          />
+          <UserStoriesIsland />
         </div>
       ),
     },

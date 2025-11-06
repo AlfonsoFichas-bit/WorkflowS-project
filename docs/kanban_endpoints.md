@@ -175,8 +175,11 @@ Con estos endpoints implementados, la base para el Kanban está lista:
 3. ✅ **Actualizar estados de tareas**
 4. ✅ **Actualizar estado del sprint**
 
+### Actualizaciones en Tiempo Real (WebSockets)
+
+- ✅ **WebSocket integration para actualizaciones en tiempo real**: ¡Implementado! Las acciones como crear, actualizar estado, asignar o eliminar una tarea ahora emiten eventos a través de WebSockets para actualizar el tablero en todos los clientes conectados. Para más detalles sobre los eventos, ver `api_documentation.md`.
+
 **Lo que falta para Kanban completo**:
-- WebSocket integration para actualizaciones en tiempo real
 - Frontend del tablero Kanban
 - Drag & drop functionality
 - Métricas del sprint

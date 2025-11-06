@@ -509,6 +509,8 @@ Creates a new sprint within a project.
     -   `id` (uint): The ID of the project.
 -   **Request Body:**
 
+    El campo `status` es opcional. Si no se incluye, el sprint se creará con el estado `planned` por defecto.
+
     ```json
     {
         "Name": "Sprint 1",

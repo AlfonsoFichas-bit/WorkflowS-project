@@ -1,5 +1,13 @@
 # WebSocket Implementation for Real-Time Kanban Updates
 
+---
+
+**Status: Implemented**
+
+*This document originally served as the design plan for the WebSocket feature. The core backend functionality has now been implemented as of November 2025. The backend successfully broadcasts events for task creation, status updates, assignments, and deletions. This document can now be used as a reference for the existing implementation and for future extensions.*
+
+---
+
 ## Overview
 This document outlines the WebSocket implementation requirements for real-time Kanban board updates, allowing multiple users to see changes instantly when tasks are moved, updated, or modified.
 

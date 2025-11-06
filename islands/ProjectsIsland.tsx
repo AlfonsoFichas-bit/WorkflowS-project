@@ -680,13 +680,17 @@ export default function ProjectsIsland() {
                     >
                       <MaterialSymbol icon="group" className="icon-md" />
                     </button>
-                    <a
-                      href={`/dashboard/kanban?projectId=${project.ID}`}
+                    <button
+                      type="button"
                       class="text-indigo-600 hover:text-indigo-800"
                       title="Abrir Kanban"
+                      onClick={() => {
+                        // Forzar navegación full-page para evitar que la SPA intercepte la ruta
+                        globalThis.location.assign(`/dashboard/projects/${project.ID}/kanban`);
+                      }}
                     >
                       <MaterialSymbol icon="view_kanban" className="icon-md" />
-                    </a>
+                    </button>
                     <button
                       type="button"
                       class="text-red-600 hover:text-red-800"

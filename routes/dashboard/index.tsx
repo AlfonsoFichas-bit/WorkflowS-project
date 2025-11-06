@@ -7,7 +7,7 @@ export default define.page(function Dashboard() {
   return (
     <>
       <Head>
-        <title>WorkflowS Dashboard</title>
+        <title>Panel de Control - WorkflowS</title>
       </Head>
       <DashboardLayout>
         <DashboardSpaIsland />

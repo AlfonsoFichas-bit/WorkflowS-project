@@ -16,13 +16,13 @@ export default define.page(function Home() {
                 class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
                 href="#"
               >
-                Features
+                Características
               </a>
               <a
                 class="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
                 href="#"
               >
-                About Us
+                Acerca de
               </a>
             </nav>
             <div class="flex items-center gap-2">

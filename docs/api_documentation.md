@@ -1,1173 +1,631 @@
 # API Documentation
 
-## Base URL
-
-The base URL for all API endpoints is:
-
-```
-http://localhost:8080
-```
-
-This document provides a detailed description of the API endpoints, including request and response formats.
+This document provides detailed documentation for the API endpoints.
 
 ## Authentication
 
-All endpoints under `/api` require a valid JSON Web Token (JWT) to be included in the `Authorization` header as a Bearer token.
+### POST /login
 
-```
-Authorization: Bearer <your_jwt_token>
-```
-
-## Endpoints
-
-### Authentication
-
-#### POST /login
-
-Authenticates a user and returns a JWT token.
-
--   **Request Body:**
-
+- **Description:** Authenticates a user and returns a JWT token.
+- **Request Body:**
+  ```json
+  {
+    "correo": "user@example.com",
+    "contraseña": "password"
+  }
+  ```
+- **Responses:**
+  - `200 OK`: Returns a JWT token.
     ```json
     {
-        "correo": "user@example.com",
-        "contraseña": "password123"
+      "token": "your_jwt_token"
     }
     ```
+  - `400 Bad Request`: Invalid input.
+  - `401 Unauthorized`: Invalid credentials.
 
--   **Response (200 OK):**
+### POST /create-admin
 
-    ```json
-    {
-        "token": "your_jwt_token"
-    }
-    ```
+- **Description:** Creates a new admin user. This is typically a setup endpoint.
+- **Request Body:** `models.User`
+- **Responses:**
+  - `201 Created`: Returns the created admin user (without password).
+  - `400 Bad Request`: Invalid input.
+  - `500 Internal Server Error`: Could not create admin user.
 
-#### POST /api/logout
+## Users
 
-Logs out the user. This endpoint is used to signal the server that the user is logging out. The client is responsible for deleting the JWT token from storage.
+### GET /api/me
 
--   **Response (200 OK):**
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves the details of the currently authenticated user.
+- **Responses:**
+  - `200 OK`: Returns the current user's data (`models.User`).
+  - `401 Unauthorized`: Invalid token.
+  - `404 Not Found`: User not found.
 
-    ```json
-    {
-        "message": "Logged out successfully"
-    }
-    ```
+### GET /api/users/:id
 
-### Users
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves a specific user by their ID.
+- **URL Parameters:**
+  - `id` (integer): The ID of the user.
+- **Responses:**
+  - `200 OK`: Returns the user data (`models.User`).
+  - `400 Bad Request`: Invalid ID.
+  - `404 Not Found`: User not found.
 
-#### GET /api/me
+## Notifications
 
-Retrieves the details of the currently authenticated user.
+### GET /api/notifications
 
--   **Response (200 OK):**
+- **Authentication:** JWT Token required.
+- **Description:** Gets all notifications for the current user.
+- **Responses:**
+  - `200 OK`: Returns a list of notifications (`[]models.Notification`).
+  - `500 Internal Server Error`: Failed to retrieve notifications.
 
-    ```json
-    {
-        "ID": 1,
-        "Nombre": "John",
-        "ApellidoPaterno": "Doe",
-        "ApellidoMaterno": "Smith",
-        "Correo": "user@example.com",
-        "Role": "user",
-        "CreatedAt": "2023-10-27T10:00:00Z"
-    }
-    ```
+### POST /api/notifications/read/all
 
-#### GET /api/users/:id
+- **Authentication:** JWT Token required.
+- **Description:** Marks all of a user's notifications as read.
+- **Responses:**
+  - `204 No Content`: Successfully marked all as read.
+  - `500 Internal Server Error`: Failed to mark all notifications as read.
 
-Retrieves a user by their ID.
+### POST /api/notifications/:id/read
 
--   **Path Parameters:**
-    -   `id` (uint): The ID of the user to retrieve.
--   **Response (200 OK):**
+- **Authentication:** JWT Token required.
+- **Description:** Marks a specific notification as read.
+- **URL Parameters:**
+  - `id` (integer): The ID of the notification.
+- **Responses:**
+  - `204 No Content`: Successfully marked as read.
+  - `400 Bad Request`: Invalid notification ID.
+  - `500 Internal Server Error`: Failed to mark notification as read.
 
-    ```json
-    {
-        "ID": 1,
-        "Nombre": "John",
-        "ApellidoPaterno": "Doe",
-        "ApellidoMaterno": "Smith",
-        "Correo": "user@example.com",
-        "Role": "user",
-        "CreatedAt": "2023-10-27T10:00:00Z"
-    }
-    ```
+## Projects
 
-### Admin - User Management
+### POST /api/projects
 
-#### GET /api/admin/users
+- **Authentication:** JWT Token required.
+- **Description:** Creates a new project.
+- **Request Body:** `models.Project`
+- **Responses:**
+  - `201 Created`: Returns the created project (`models.Project`).
+  - `400 Bad Request`: Invalid input.
+  - `500 Internal Server Error`: Could not create project.
 
-Retrieves a list of all users. (Admin only)
+### GET /api/projects
 
-- **Response (200 OK):**
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves all projects.
+- **Responses:**
+  - `200 OK`: Returns a list of projects (`[]models.Project`).
+  - `500 Internal Server Error`: Could not retrieve projects.
+
+### GET /api/projects/:id
+
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves a single project by its ID.
+- **URL Parameters:**
+  - `id` (integer): The ID of the project.
+- **Responses:**
+  - `200 OK`: Returns the project data (`models.Project`).
+  - `400 Bad Request`: Invalid project ID.
+  - `404 Not Found`: Project not found.
+
+### PUT /api/projects/:id
+
+- **Authentication:** JWT Token required.
+- **Description:** Updates a project.
+- **URL Parameters:**
+  - `id` (integer): The ID of the project.
+- **Request Body:** A map of fields to update.
+  ```json
+  {
+    "name": "New Project Name",
+    "description": "Updated description."
+  }
+  ```
+- **Responses:**
+  - `200 OK`: Returns the updated project (`models.Project`).
+  - `400 Bad Request`: Invalid project ID or request body.
+  - `403 Forbidden`: User does not have permission to update.
+  - `500 Internal Server Error`: Could not update project.
+
+### DELETE /api/projects/:id
+
+- **Authentication:** JWT Token required.
+- **Description:** Deletes a project.
+- **URL Parameters:**
+  - `id` (integer): The ID of the project.
+- **Responses:**
+  - `204 No Content`: Successfully deleted the project.
+  - `400 Bad Request`: Invalid project ID.
+  - `403 Forbidden`: User does not have permission to delete.
+  - `500 Internal Server Error`: Could not delete project.
+
+### GET /api/projects/:id/unassigned-users
+
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves users who are not yet assigned to the project.
+- **URL Parameters:**
+  - `id` (integer): The ID of the project.
+- **Responses:**
+  - `200 OK`: Returns a list of unassigned users (`[]models.User`).
+  - `400 Bad Request`: Invalid project ID.
+  - `500 Internal Server Error`: Could not retrieve unassigned users.
+
+### GET /api/projects/:id/members
+
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves all members of a project.
+- **URL Parameters:**
+  - `id` (integer): The ID of the project.
+- **Responses:**
+  - `200 OK`: Returns a list of project members (`[]models.ProjectMember`).
+  - `400 Bad Request`: Invalid project ID.
+  - `500 Internal Server Error`: Could not retrieve project members.
+
+## Rubrics
+
+### POST /api/rubrics
+
+- **Authentication:** JWT Token required.
+- **Description:** Creates a new rubric.
+- **Request Body:** `models.Rubric`
+- **Responses:**
+  - `201 Created`: Returns the created rubric (`models.Rubric`).
+  - `400 Bad Request`: Invalid request body.
+  - `500 Internal Server Error`: Could not create rubric.
+
+### GET /api/rubrics
+
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves all rubrics. Can be filtered by query parameters (e.g., `?isTemplate=true`).
+- **Responses:**
+  - `200 OK`: Returns a list of rubrics (`[]models.Rubric`).
+  - `500 Internal Server Error`: Could not retrieve rubrics.
+
+### GET /api/rubrics/:id
+
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves a single rubric by its ID.
+- **URL Parameters:**
+  - `id` (integer): The ID of the rubric.
+- **Responses:**
+  - `200 OK`: Returns the rubric data (`models.Rubric`).
+  - `400 Bad Request`: Invalid ID format.
+  - `404 Not Found`: Rubric not found.
+
+### PUT /api/rubrics/:id
+
+- **Authentication:** JWT Token required.
+- **Description:** Updates an existing rubric.
+- **URL Parameters:**
+  - `id` (integer): The ID of the rubric.
+- **Request Body:** `models.Rubric`
+- **Responses:**
+  - `200 OK`: Returns the updated rubric (`models.Rubric`).
+  - `400 Bad Request`: Invalid ID format or request body.
+  - `500 Internal Server Error`: Could not update rubric.
+
+### DELETE /api/rubrics/:id
+
+- **Authentication:** JWT Token required.
+- **Description:** Deletes a rubric.
+- **URL Parameters:**
+  - `id` (integer): The ID of the rubric.
+- **Responses:**
+  - `204 No Content`: Successfully deleted the rubric.
+  - `400 Bad Request`: Invalid ID format.
+  - `500 Internal Server Error`: Could not delete rubric.
+
+### POST /api/rubrics/:id/duplicate
+
+- **Authentication:** JWT Token required.
+- **Description:** Duplicates an existing rubric.
+- **URL Parameters:**
+  - `id` (integer): The ID of the rubric to duplicate.
+- **Responses:**
+  - `201 Created`: Returns the new, duplicated rubric (`models.Rubric`).
+  - `400 Bad Request`: Invalid ID format.
+  - `500 Internal Server Error`: Could not duplicate rubric.
+
+## User Stories
+
+### POST /api/projects/:id/userstories
+
+- **Authentication:** JWT Token required.
+- **Description:** Creates a new user story within a project.
+- **URL Parameters:**
+  - `id` (integer): The ID of the project.
+- **Request Body:** `models.UserStory`
+- **Responses:**
+  - `201 Created`: Returns the created user story (`models.UserStory`).
+  - `400 Bad Request`: Invalid project ID or input.
+  - `500 Internal Server Error`: Could not create user story.
+
+### GET /api/projects/:id/userstories
+
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves all user stories for a specific project.
+- **URL Parameters:**
+  - `id` (integer): The ID of the project.
+- **Responses:**
+  - `200 OK`: Returns a list of user stories (`[]models.UserStory`).
+  - `400 Bad Request`: Invalid project ID.
+  - `500 Internal Server Error`: Could not retrieve user stories.
+
+### GET /api/userstories/:storyId
+
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves a single user story by its ID.
+- **URL Parameters:**
+  - `storyId` (integer): The ID of the user story.
+- **Responses:**
+  - `200 OK`: Returns the user story data (`models.UserStory`).
+  - `400 Bad Request`: Invalid user story ID.
+  - `404 Not Found`: User story not found.
+
+### PUT /api/userstories/:storyId
+
+- **Authentication:** JWT Token required.
+- **Description:** Updates a user story.
+- **URL Parameters:**
+  - `storyId` (integer): The ID of the user story.
+- **Request Body:** A map of fields to update.
+- **Responses:**
+  - `200 OK`: Returns the updated user story (`models.UserStory`).
+  - `400 Bad Request`: Invalid user story ID or request body.
+  - `403 Forbidden`: User does not have permission to update.
+  - `404 Not Found`: User story not found.
+  - `500 Internal Server Error`: Could not update user story.
+
+### DELETE /api/userstories/:storyId
+
+- **Authentication:** JWT Token required.
+- **Description:** Deletes a user story.
+- **URL Parameters:**
+  - `storyId` (integer): The ID of the user story.
+- **Responses:**
+  - `204 No Content`: Successfully deleted the user story.
+  - `400 Bad Request`: Invalid user story ID.
+  - `403 Forbidden`: User does not have permission to delete.
+  - `404 Not Found`: User story not found.
+  - `500 Internal Server Error`: Could not delete user story.
+
+## Tasks
+
+### POST /api/userstories/:storyId/tasks
+
+- **Authentication:** JWT Token required.
+- **Description:** Creates a new task for a user story.
+- **URL Parameters:**
+  - `storyId` (integer): The ID of the user story.
+- **Request Body:** `models.Task`
+- **Responses:**
+  - `201 Created`: Returns the created task (`models.Task`).
+  - `400 Bad Request`: Invalid user story ID or input.
+  - `500 Internal Server Error`: Could not create task.
+
+### GET /api/userstories/:storyId/tasks
+
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves all tasks for a user story.
+- **URL Parameters:**
+  - `storyId` (integer): The ID of the user story.
+- **Responses:**
+  - `200 OK`: Returns a list of tasks (`[]models.Task`).
+  - `400 Bad Request`: Invalid user story ID.
+  - `500 Internal Server Error`: Could not retrieve tasks.
+
+### PUT /api/tasks/:taskId
+
+- **Authentication:** JWT Token required.
+- **Description:** Updates a task.
+- **URL Parameters:**
+  - `taskId` (integer): The ID of the task.
+- **Request Body:** `models.Task`
+- **Responses:**
+  - `200 OK`: Returns the updated task (`models.Task`).
+  - `400 Bad Request`: Invalid task ID or input.
+  - `404 Not Found`: Task not found.
+  - `500 Internal Server Error`: Could not update task.
+
+### DELETE /api/tasks/:taskId
+
+- **Authentication:** JWT Token required.
+- **Description:** Deletes a task.
+- **URL Parameters:**
+  - `taskId` (integer): The ID of the task.
+- **Responses:**
+  - `204 No Content`: Successfully deleted the task.
+  - `400 Bad Request`: Invalid task ID.
+  - `404 Not Found`: Task not found or could not be deleted.
+
+### PUT /api/tasks/:taskId/assign
+
+- **Authentication:** JWT Token required.
+- **Description:** Assigns a task to a user.
+- **URL Parameters:**
+  - `taskId` (integer): The ID of the task.
+- **Request Body:**
+  ```json
+  {
+    "userId": 123
+  }
+  ```
+- **Responses:**
+  - `200 OK`: Returns the updated task (`models.Task`).
+  - `400 Bad Request`: Invalid task ID or request body.
+
+### PUT /api/tasks/:taskId/status
+
+- **Authentication:** JWT Token required.
+- **Description:** Updates the status of a task.
+- **URL Parameters:**
+  - `taskId` (integer): The ID of the task.
+- **Request Body:**
+  ```json
+  {
+    "status": "in_progress"
+  }
+  ```
+- **Responses:**
+  - `200 OK`: Returns the updated task (`models.Task`).
+  - `400 Bad Request`: Invalid task ID or request body.
+  - `500 Internal Server Error`: Could not update task status.
+
+### POST /api/tasks/:id/comments
+
+- **Authentication:** JWT Token required.
+- **Description:** Adds a comment to a task.
+- **URL Parameters:**
+  - `id` (integer): The ID of the task.
+- **Request Body:**
+  ```json
+  {
+    "content": "This is a comment."
+  }
+  ```
+- **Responses:**
+  - `201 Created`: Returns the created comment (`models.TaskComment`).
+  - `400 Bad Request`: Invalid task ID or empty comment.
+  - `500 Internal Server Error`: Could not add comment.
+
+## Sprints
+
+### POST /api/projects/:id/sprints
+
+- **Authentication:** JWT Token required.
+- **Description:** Creates a new sprint within a project.
+- **URL Parameters:**
+  - `id` (integer): The ID of the project.
+- **Request Body:** `models.Sprint`. El campo `status` es opcional; si no se provee, el sprint se creará con el estado `'planned'`.
+- **Responses:**
+  - `201 Created`: Returns the created sprint (`models.Sprint`).
+  - `400 Bad Request`: Invalid project ID or input.
+  - `500 Internal Server Error`: Could not create sprint.
+
+### GET /api/projects/:id/sprints
+
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves all sprints for a project.
+- **URL Parameters:**
+  - `id` (integer): The ID of the project.
+- **Responses:**
+  - `200 OK`: Returns a list of sprints (`[]models.Sprint`).
+  - `400 Bad Request`: Invalid project ID.
+  - `500 Internal Server Error`: Could not retrieve sprints.
+
+### GET /api/sprints/:sprintId
+
+- **Authentication:** JWT Token required.
+- **Description:** Retrieves a single sprint by its ID.
+- **URL Parameters:**
+  - `sprintId` (integer): The ID of the sprint.
+- **Responses:**
+  - `200 OK`: Returns the sprint data (`models.Sprint`).
+  - `400 Bad Request`: Invalid sprint ID.
+  - `404 Not Found`: Sprint not found.
+
+### PUT /api/sprints/:sprintId
+
+- **Authentication:** JWT Token required.
+- **Description:** Updates a sprint.
+- **URL Parameters:**
+  - `sprintId` (integer): The ID of the sprint.
+- **Request Body:** `models.Sprint`
+- **Responses:**
+  - `200 OK`: Returns the updated sprint (`models.Sprint`).
+  - `400 Bad Request`: Invalid sprint ID or input.
+  - `404 Not Found`: Sprint not found.
+  - `500 Internal Server Error`: Could not update sprint.
+
+### DELETE /api/sprints/:sprintId
+
+- **Authentication:** JWT Token required.
+- **Description:** Deletes a sprint.
+- **URL Parameters:**
+  - `sprintId` (integer): The ID of the sprint.
+- **Responses:**
+  - `204 No Content`: Successfully deleted the sprint.
+  - `400 Bad Request`: Invalid sprint ID.
+  - `404 Not Found`: Sprint not found or could not be deleted.
+
+### POST /api/sprints/:sprintId/userstories
+
+- **Authentication:** JWT Token required.
+- **Description:** Assigns a user story to a sprint.
+- **URL Parameters:**
+  - `sprintId` (integer): The ID of the sprint.
+- **Request Body:**
+  ```json
+  {
+    "userStoryId": 456
+  }
+  ```
+- **Responses:**
+  - `200 OK`: Returns the updated user story (`models.UserStory`).
+  - `400 Bad Request`: Invalid sprint ID or request body.
+  - `403 Forbidden`: User does not have permission to assign.
+  - `404 Not Found`: Sprint or user story not found.
+  - `500 Internal Server Error`: Could not assign user story.
+
+## Admin Routes
+
+The following routes are protected and require admin privileges.
+
+### GET /api/admin/users
+
+- **Authentication:** JWT Token and Admin role required.
+- **Description:** Retrieves all users in the system.
+- **Responses:**
+  - `200 OK`: Returns a list of all users (`[]models.User`).
+  - `500 Internal Server Error`: Could not retrieve users.
+
+### POST /api/admin/users
+
+- **Authentication:** JWT Token and Admin role required.
+- **Description:** Creates a new standard user.
+- **Request Body:** `models.User`
+- **Responses:**
+  - `201 Created`: Returns the created user (`models.User`).
+  - `400 Bad Request`: Invalid input.
+  - `500 Internal Server Error`: Could not create user.
+
+### POST /api/admin/users/admin
+
+- **Authentication:** JWT Token and Admin role required.
+- **Description:** Creates a new admin user.
+- **Request Body:** `models.User`
+- **Responses:**
+  - `201 Created`: Returns the created admin user (`models.User`).
+  - `400 Bad Request`: Invalid input.
+  - `500 Internal Server Error`: Could not create admin user.
+
+### PUT /api/admin/users/:id
+
+- **Authentication:** JWT Token and Admin role required.
+- **Description:** Updates a user's information.
+- **URL Parameters:**
+  - `id` (integer): The ID of the user to update.
+- **Request Body:** `models.User`
+- **Responses:**
+  - `200 OK`: Returns the updated user (`models.User`).
+  - `400 Bad Request`: Invalid ID or input.
+  - `500 Internal Server Error`: Could not update user.
+
+### DELETE /api/admin/users/:id
+
+- **Authentication:** JWT Token and Admin role required.
+- **Description:** Deletes a user.
+- **URL Parameters:**
+  - `id` (integer): The ID of the user to delete.
+- **Responses:**
+  - `204 No Content`: Successfully deleted the user.
+  - `400 Bad Request`: Invalid ID.
+  - `500 Internal Server Error`: Could not delete user.
+
+### POST /api/admin/projects/:id/members
+
+- **Authentication:** JWT Token and Admin role required.
+- **Description:** Adds a member to a project.
+- **URL Parameters:**
+  - `id` (integer): The ID of the project.
+- **Request Body:**
+  ```json
+  {
+    "userId": 123,
+    "role": "team_developer"
+  }
+  ```
+- **Responses:**
+  - `201 Created`: Returns the new project member details (`models.ProjectMember`).
+  - `400 Bad Request`: Invalid project ID or request body.
+  - `409 Conflict`: User is already a member of the project.
+  - `500 Internal Server Error`: Could not add member.
+
+## WebSockets y Actualizaciones en Tiempo Real
+
+El API provee un endpoint de WebSocket para recibir actualizaciones en tiempo real, ideal para mantener sincronizados los tableros Kanban y otras interfaces de usuario.
+
+### Conexión
+
+- **Endpoint:** `GET /ws`
+- **Protocolo:** `wss://` (en producción) o `ws://` (en desarrollo)
+- **Autenticación:** Debes proveer un token JWT válido como parámetro en la URL.
+  ```
+  ws://localhost:8080/ws?token=TU_TOKEN_JWT_AQUI
+  ```
+
+### Eventos del Servidor
+
+Una vez conectado, el cliente recibirá mensajes en formato JSON con la siguiente estructura:
 
 ```json
-[
-    {
-        "ID": 1,
-        "Nombre": "Admin",
-        "ApellidoPaterno": "User",
-        "ApellidoMaterno": "",
-        "Correo": "admin@example.com",
-        "Role": "admin",
-        "CreatedAt": "2023-10-27T10:10:00Z"
-    },
-    {
-        "ID": 2,
-        "Nombre": "Jane",
-        "ApellidoPaterno": "Doe",
-        "ApellidoMaterno": "Smith",
-        "Correo": "jane.doe@example.com",
-        "Role": "user",
-        "CreatedAt": "2023-10-27T10:05:00Z"
-    }
-]
+{
+  "type": "nombre_del_evento",
+  "payload": { ... }
+}
 ```
 
-#### POST /api/admin/users
-
-Creates a new standard platform user. (Admin only)
-
--   **Request Body:**
-
-    ```json
-    {
-        "Nombre": "Jane",
-        "ApellidoPaterno": "Doe",
-        "ApellidoMaterno": "Smith",
-        "Correo": "jane.doe@example.com",
-        "Contraseña": "password123"
-    }
-    ```
-
--   **Response (201 Created):**
-
-    ```json
-    {
-        "ID": 2,
-        "Nombre": "Jane",
-        "ApellidoPaterno": "Doe",
-        "ApellidoMaterno": "Smith",
-        "Correo": "jane.doe@example.com",
-        "Role": "user",
-        "CreatedAt": "2023-10-27T10:05:00Z"
-    }
-    ```
-
-#### POST /api/admin/users/admin
-
-Creates a new admin user. (Admin only)
-
--   **Request Body:**
-
-    ```json
-    {
-        "Nombre": "Admin",
-        "ApellidoPaterno": "User",
-        "ApellidoMaterno": "",
-        "Correo": "admin@example.com",
-        "Contraseña": "adminpassword"
-    }
-    ```
-
--   **Response (201 Created):**
-
-    ```json
-    {
-        "ID": 3,
-        "Nombre": "Admin",
-        "ApellidoPaterno": "User",
-        "ApellidoMaterno": "",
-        "Correo": "admin@example.com",
-        "Role": "admin",
-        "CreatedAt": "2023-10-27T10:10:00Z"
-    }
-    ```
-
-#### PUT /api/admin/users/:id
-
-Updates a user's information. (Admin only)
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the user to update.
--   **Request Body:**
-
-    ```json
-    {
-        "Nombre": "Updated Name"
-    }
-    ```
-
--   **Response (200 OK):**
-
-    ```json
-    {
-        "ID": 2,
-        "Nombre": "Updated Name",
-        "ApellidoPaterno": "Doe",
-        "ApellidoMaterno": "Smith",
-        "Correo": "jane.doe@example.com",
-        "Role": "user",
-        "CreatedAt": "2023-10-27T10:05:00Z"
-    }
-    ```
-
-#### DELETE /api/admin/users/:id
-
-Deletes a user. (Admin only)
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the user to delete.
--   **Response (204 No Content)**
-
-### Public Admin Creation
-
-#### POST /create-admin
-
-Creates a new admin user. This is a public endpoint and should be used with caution.
-
--   **Request Body:**
-
-    ```json
-    {
-        "Nombre": "Admin",
-        "ApellidoPaterno": "User",
-        "ApellidoMaterno": "",
-        "Correo": "newadmin@example.com",
-        "Contraseña": "strongpassword"
-    }
-    ```
-
--   **Response (201 Created):**
-
-    ```json
-    {
-        "ID": 4,
-        "Nombre": "Admin",
-        "ApellidoPaterno": "User",
-        "ApellidoMaterno": "",
-        "Correo": "newadmin@example.com",
-        "Role": "admin",
-        "CreatedAt": "2023-10-27T10:12:00Z"
-    }
-    ```
-
-### Projects
-
-#### POST /api/projects
-
-Creates a new project.
-
--   **Request Body:**
-
-    ```json
-    {
-        "Name": "New Project",
-        "Description": "This is a new project."
-    }
-    ```
-
--   **Response (201 Created):**
-
-    ```json
-    {
-        "ID": 1,
-        "Name": "New Project",
-        "Description": "This is a new project.",
-        "Status": "planning",
-        "StartDate": null,
-        "EndDate": null,
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:15:00Z",
-        "UpdatedAt": "2023-10-27T10:15:00Z"
-    }
-    ```
-
-#### GET /api/projects
-
-Retrieves all projects.
-
--   **Response (200 OK):**
-
-    ```json
-    [
-        {
-            "ID": 1,
-            "Name": "New Project",
-            "Description": "This is a new project.",
-            "Status": "planning",
-            "StartDate": null,
-            "EndDate": null,
-            "CreatedByID": 1,
-            "CreatedAt": "2023-10-27T10:15:00Z",
-            "UpdatedAt": "2023-10-27T10:15:00Z"
-        }
-    ]
-    ```
-
-#### GET /api/projects/:id
-
-Retrieves a project by its ID.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the project to retrieve.
--   **Response (200 OK):**
-
-    ```json
-    {
-        "ID": 1,
-        "Name": "New Project",
-        "Description": "This is a new project.",
-        "Status": "planning",
-        "StartDate": null,
-        "EndDate": null,
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:15:00Z",
-        "UpdatedAt": "2023-10-27T10:15:00Z"
-    }
-    ```
-
-#### PUT /api/projects/:id
-
-Updates a project.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the project to update.
--   **Request Body:**
-
-    ```json
-    {
-        "Name": "Updated Project Name"
-    }
-    ```
-
--   **Response (200 OK):**
-
-    ```json
-    {
-        "ID": 1,
-        "Name": "Updated Project Name",
-        "Description": "This is a new project.",
-        "Status": "planning",
-        "StartDate": null,
-        "EndDate": null,
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:15:00Z",
-        "UpdatedAt": "2023-10-27T10:20:00Z"
-    }
-    ```
-
-#### DELETE /api/projects/:id
-
-Deletes a project.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the project to delete.
--   **Response (204 No Content)**
-
-#### GET /api/projects/:id/unassigned-users
-
-Retrieves a list of users who can be added to a project. This list excludes existing project members and any users with the 'admin' role.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the project.
--   **Response (200 OK):**
-
-    ```json
-    [
-        {
-            "ID": 3,
-            "Nombre": "Carlos",
-            "ApellidoPaterno": "Ruiz",
-            "ApellidoMaterno": "Gomez",
-            "Correo": "carlos.ruiz@example.com",
-            "Role": "user",
-            "CreatedAt": "2023-10-27T10:11:00Z"
-        }
-    ]
-    ```
-
-#### GET /api/projects/:id/members
-
-Retrieves a list of all members for a specific project, including their user details and role within the project.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the project.
--   **Response (200 OK):**
-
-    ```json
-    [
-        {
-            "ID": 1,
-            "UserID": 2,
-            "User": {
-                "ID": 2,
-                "Nombre": "Jane",
-                "ApellidoPaterno": "Doe",
-                "ApellidoMaterno": "Smith",
-                "Correo": "jane.doe@example.com",
-                "Role": "user",
-                "CreatedAt": "2023-10-27T10:05:00Z"
-            },
-            "ProjectID": 1,
-            "Role": "team_developer",
-            "CreatedAt": "2023-10-27T10:25:00Z",
-            "UpdatedAt": "2023-10-27T10:25:00Z"
-        }
-    ]
-    ```
-
-### Admin - Project Management
-
-#### POST /api/admin/projects/:id/members
-
-Adds a member to a project. (Admin only)
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the project.
--   **Request Body:**
-
-    ```json
-    {
-        "userId": 2,
-        "role": "team_developer"
-    }
-    ```
-
--   **Response (201 Created):**
-
-    ```json
-    {
-        "ID": 1,
-        "UserID": 2,
-        "ProjectID": 1,
-        "Role": "team_developer",
-        "CreatedAt": "2023-10-27T10:25:00Z",
-        "UpdatedAt": "2023-10-27T10:25:00Z"
-    }
-    ```
-
--   **Response (409 Conflict):**
-
-    Returned if the user is already a member of the project.
-
-    ```json
-    {
-        "error": "user is already a member of this project"
-    }
-    ```
-
-### Sprints
-
-#### POST /api/projects/:id/sprints
-
-Creates a new sprint within a project.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the project.
--   **Request Body:**
-
-    ```json
-    {
-        "Name": "Sprint 1",
-        "Goal": "Complete feature X",
-        "StartDate": "2023-11-01T00:00:00Z",
-        "EndDate": "2023-11-15T23:59:59Z"
-    }
-    ```
-
--   **Response (201 Created):**
-
-    ```json
-    {
-        "ID": 1,
-        "Name": "Sprint 1",
-        "Goal": "Complete feature X",
-        "ProjectID": 1,
-        "Status": "planned",
-        "StartDate": "2023-11-01T00:00:00Z",
-        "EndDate": "2023-11-15T23:59:59Z",
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:30:00Z",
-        "UpdatedAt": "2023-10-27T10:30:00Z"
-    }
-    ```
-
-#### GET /api/projects/:id/sprints
-
-Retrieves all sprints for a project.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the project.
--   **Response (200 OK):**
-
-    ```json
-    [
-        {
-            "ID": 1,
-            "Name": "Sprint 1",
-            "Goal": "Complete feature X",
-            "ProjectID": 1,
-            "Status": "planned",
-            "StartDate": "2023-11-01T00:00:00Z",
-            "EndDate": "2023-11-15T23:59:59Z",
-            "CreatedByID": 1,
-            "CreatedAt": "2023-10-27T10:30:00Z",
-            "UpdatedAt": "2023-10-27T10:30:00Z"
-        }
-    ]
-    ```
-
-#### GET /api/sprints/:sprintId
-
-Retrieves a sprint by its ID.
-
--   **Path Parameters:**
-    -   `sprintId` (uint): The ID of the sprint.
--   **Response (200 OK):**
-
-    ```json
-    {
-        "ID": 1,
-        "Name": "Sprint 1",
-        "Goal": "Complete feature X",
-        "ProjectID": 1,
-        "Status": "planned",
-        "StartDate": "2023-11-01T00:00:00Z",
-        "EndDate": "2023-11-15T23:59:59Z",
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:30:00Z",
-        "UpdatedAt": "2023-10-27T10:30:00Z"
-    }
-    ```
-
-#### PUT /api/sprints/:sprintId
-
-Updates a sprint.
-
--   **Path Parameters:**
-    -   `sprintId` (uint): The ID of the sprint.
--   **Request Body:**
-
-    ```json
-    {
-        "Name": "Updated Sprint Name"
-    }
-    ```
-
--   **Response (200 OK):**
-
-    ```json
-    {
-        "ID": 1,
-        "Name": "Updated Sprint Name",
-        "Goal": "Complete feature X",
-        "ProjectID": 1,
-        "Status": "planned",
-        "StartDate": "2023-11-01T00:00:00Z",
-        "EndDate": "2023-11-15T23:59:59Z",
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:30:00Z",
-        "UpdatedAt": "2023-10-27T10:35:00Z"
-    }
-    ```
-
-#### DELETE /api/sprints/:sprintId
-
-Deletes a sprint.
-
--   **Path Parameters:**
-    -   `sprintId` (uint): The ID of the sprint.
--   **Response (204 No Content)**
-
-#### POST /api/sprints/:sprintId/userstories
-
-Assigns a user story to a sprint.
-
--   **Path Parameters:**
-    -   `sprintId` (uint): The ID of the sprint.
--   **Request Body:**
-
-    ```json
-    {
-        "userStoryId": 1
-    }
-    ```
-
--   **Response (200 OK):**
-
-    ```json
-    {
-        "ID": 1,
-        "Title": "User Story 1",
-        "Description": "As a user, I want to...",
-        "AcceptanceCriteria": "...",
-        "Priority": "high",
-        "Status": "in_sprint",
-        "Points": 5,
-        "ProjectID": 1,
-        "SprintID": 1,
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:40:00Z",
-        "UpdatedAt": "2023-10-27T10:45:00Z"
-    }
-    ```
-
-### User Stories
-
-#### POST /api/projects/:id/userstories
-
-Creates a new user story within a project.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the project.
--   **Request Body:**
-
-    ```json
-    {
-        "Title": "User Story 1",
-        "Description": "As a user, I want to...",
-        "AcceptanceCriteria": "..."
-    }
-    ```
-
--   **Response (201 Created):**
-
-    ```json
-    {
-        "ID": 1,
-        "Title": "User Story 1",
-        "Description": "As a user, I want to...",
-        "AcceptanceCriteria": "...",
-        "Priority": "medium",
-        "Status": "backlog",
-        "Points": null,
-        "ProjectID": 1,
-        "SprintID": null,
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:40:00Z",
-        "UpdatedAt": "2023-10-27T10:40:00Z"
-    }
-    ```
-
-#### GET /api/projects/:id/userstories
-
-Retrieves all user stories for a project.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the project.
--   **Response (200 OK):**
-
-    ```json
-    [
-        {
-            "ID": 1,
-            "Title": "User Story 1",
-            "Description": "As a user, I want to...",
-            "AcceptanceCriteria": "...",
-            "Priority": "medium",
-            "Status": "backlog",
-            "Points": null,
-            "ProjectID": 1,
-            "SprintID": null,
-            "CreatedByID": 1,
-            "CreatedAt": "2023-10-27T10:40:00Z",
-            "UpdatedAt": "2023-10-27T10:40:00Z"
-        }
-    ]
-    ```
-
-#### GET /api/userstories/:storyId
-
-Retrieves a user story by its ID.
-
--   **Path Parameters:**
-    -   `storyId` (uint): The ID of the user story.
--   **Response (200 OK):**
-
-    ```json
-    {
-        "ID": 1,
-        "Title": "User Story 1",
-        "Description": "As a user, I want to...",
-        "AcceptanceCriteria": "...",
-        "Priority": "medium",
-        "Status": "backlog",
-        "Points": null,
-        "ProjectID": 1,
-        "SprintID": null,
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:40:00Z",
-        "UpdatedAt": "2023-10-27T10:40:00Z"
-    }
-    ```
-
-#### PUT /api/userstories/:storyId
-
-Updates a user story.
-
--   **Path Parameters:**
-    -   `storyId` (uint): The ID of the user story.
--   **Request Body:**
-
-    ```json
-    {
-        "Title": "Updated User Story Title"
-    }
-    ```
-
--   **Response (200 OK):**
-
-    ```json
-    {
-        "ID": 1,
-        "Title": "Updated User Story Title",
-        "Description": "As a user, I want to...",
-        "AcceptanceCriteria": "...",
-        "Priority": "medium",
-        "Status": "backlog",
-        "Points": null,
-        "ProjectID": 1,
-        "SprintID": null,
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:40:00Z",
-        "UpdatedAt": "2023-10-27T10:50:00Z"
-    }
-    ```
-
-#### DELETE /api/userstories/:storyId
-
-Deletes a user story.
-
--   **Path Parameters:**
-    -   `storyId` (uint): The ID of the user story.
--   **Response (204 No Content)**
-
-### Tasks
-
-#### POST /api/userstories/:storyId/tasks
-
-Creates a new task within a user story.
-
--   **Path Parameters:**
-    -   `storyId` (uint): The ID of the user story.
--   **Request Body:**
-
-    ```json
-    {
-        "Title": "Task 1",
-        "Description": "Implement the first part of the story."
-    }
-    ```
-
--   **Response (201 Created):**
-
-    ```json
-    {
-        "ID": 1,
-        "Title": "Task 1",
-        "Description": "Implement the first part of the story.",
-        "UserStoryID": 1,
-        "Status": "todo",
-        "AssignedToID": null,
-        "EstimatedHours": null,
-        "SpentHours": null,
-        "IsDeliverable": false,
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:55:00Z",
-        "UpdatedAt": "2023-10-27T10:55:00Z"
-    }
-    ```
-
-#### GET /api/userstories/:storyId/tasks
-
-Retrieves all tasks for a user story.
-
--   **Path Parameters:**
-    -   `storyId` (uint): The ID of the user story.
--   **Response (200 OK):**
-
-    ```json
-    [
-        {
-            "ID": 1,
-            "Title": "Task 1",
-            "Description": "Implement the first part of the story.",
-            "UserStoryID": 1,
-            "Status": "todo",
-            "AssignedToID": null,
-            "EstimatedHours": null,
-            "SpentHours": null,
-            "IsDeliverable": false,
-            "CreatedByID": 1,
-            "CreatedAt": "2023-10-27T10:55:00Z",
-            "UpdatedAt": "2023-10-27T10:55:00Z"
-        }
-    ]
-    ```
-
-#### PUT /api/tasks/:taskId
-
-Updates a task.
-
--   **Path Parameters:**
-    -   `taskId` (uint): The ID of the task.
--   **Request Body:**
-
-    ```json
-    {
-        "Title": "Updated Task Title"
-    }
-    ```
-
--   **Response (200 OK):**
-
-    ```json
-    {
-        "ID": 1,
-        "Title": "Updated Task Title",
-        "Description": "Implement the first part of the story.",
-        "UserStoryID": 1,
-        "Status": "todo",
-        "AssignedToID": null,
-        "EstimatedHours": null,
-        "SpentHours": null,
-        "IsDeliverable": false,
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:55:00Z",
-        "UpdatedAt": "2023-10-27T11:00:00Z"
-    }
-    ```
-
-#### DELETE /api/tasks/:taskId
-
-Deletes a task.
-
--   **Path Parameters:**
-    -   `taskId` (uint): The ID of the task.
--   **Response (204 No Content)**
-
-#### PUT /api/tasks/:taskId/assign
-
-Assigns a task to a user.
-
--   **Path Parameters:**
-    -   `taskId` (uint): The ID of the task.
--   **Request Body:**
-
-    ```json
-    {
-        "userId": 2
-    }
-    ```
-
--   **Response (200 OK):**
-
-    ```json
-    {
-        "ID": 1,
-        "Title": "Task 1",
-        "Description": "Implement the first part of the story.",
-        "UserStoryID": 1,
-        "Status": "todo",
-        "AssignedToID": 2,
-        "EstimatedHours": null,
-        "SpentHours": null,
-        "IsDeliverable": false,
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:55:00Z",
-        "UpdatedAt": "2023-10-27T11:05:00Z"
-    }
-    ```
-
-#### PUT /api/tasks/:taskId/status
-
-Updates the status of a task.
-
--   **Path Parameters:**
-    -   `taskId` (uint): The ID of the task.
--   **Request Body:**
-
-    ```json
-    {
-        "status": "in_progress"
-    }
-    ```
-
--   **Response (200 OK):**
-
-    ```json
-    {
-        "ID": 1,
-        "Title": "Task 1",
-        "Description": "Implement the first part of the story.",
-        "UserStoryID": 1,
-        "Status": "in_progress",
-        "AssignedToID": 2,
-        "EstimatedHours": null,
-        "SpentHours": null,
-        "IsDeliverable": false,
-        "CreatedByID": 1,
-        "CreatedAt": "2023-10-27T10:55:00Z",
-        "UpdatedAt": "2023-10-27T11:10:00Z"
-    }
-    ```
-
-#### POST /api/tasks/:id/comments
-
-Adds a comment to a task.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the task.
--   **Request Body:**
-
-    ```json
-    {
-        "content": "This is a comment."
-    }
-    ```
-
--   **Response (201 Created):**
-
-    ```json
-    {
-        "ID": 1,
-        "TaskID": 1,
-        "AuthorID": 1,
-        "Content": "This is a comment.",
-        "CreatedAt": "2023-10-27T11:15:00Z",
-        "UpdatedAt": "2023-10-27T11:15:00Z"
-    }
-    ```
-
-### Notifications
-
-#### GET /api/notifications
-
-Retrieves all notifications for the current user.
-
--   **Response (200 OK):**
-
-    ```json
-    [
-        {
-            "ID": 1,
-            "user_id": 1,
-            "message": "You have been assigned to a new task.",
-            "is_read": false,
-            "link": "/tasks/1"
-        }
-    ]
-    ```
-
-#### POST /api/notifications/read/all
-
-Marks all of a user's notifications as read.
-
--   **Response (204 No Content)**
-
-#### POST /api/notifications/:id/read
-
-Marks a notification as read.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the notification.
--   **Response (204 No Content)**
-
-### Rubrics
-
-#### POST /api/rubrics
-
-Creates a new rubric.
-
--   **Request Body:**
-
-    ```json
-    {
-        "name": "New Rubric",
-        "description": "This is a new rubric.",
-        "projectId": 1,
-        "isTemplate": false,
-        "criteria": [
-            {
-                "title": "Criterion 1",
-                "description": "Description for criterion 1",
-                "maxPoints": 10,
-                "levels": [
-                    {
-                        "score": 10,
-                        "description": "Excellent"
-                    },
-                    {
-                        "score": 5,
-                        "description": "Average"
-                    }
-                ]
-            }
-        ]
-    }
-    ```
-
--   **Response (201 Created):**
-
-    ```json
-    {
-        "id": 1,
-        "name": "New Rubric",
-        "description": "This is a new rubric.",
-        "projectId": 1,
-        "createdById": 1,
-        "status": "DRAFT",
-        "isTemplate": false,
-        "criteria": [
-            {
-                "id": 1,
-                "rubricId": 1,
-                "title": "Criterion 1",
-                "description": "Description for criterion 1",
-                "maxPoints": 10,
-                "levels": [
-                    {
-                        "id": 1,
-                        "criterionId": 1,
-                        "score": 10,
-                        "description": "Excellent"
-                    },
-                    {
-                        "id": 2,
-                        "criterionId": 1,
-                        "score": 5,
-                        "description": "Average"
-                    }
-                ]
-            }
-        ]
-    }
-    ```
-
-#### GET /api/rubrics
-
-Retrieves all rubrics.
-
--   **Query Parameters (optional):**
-    -   `isTemplate` (boolean): Filter by template status.
--   **Response (200 OK):**
-
-    ```json
-    [
-        {
-            "id": 1,
-            "name": "New Rubric",
-            "description": "This is a new rubric.",
-            "projectId": 1,
-            "createdById": 1,
-            "status": "DRAFT",
-            "isTemplate": false
-        }
-    ]
-    ```
-
-#### GET /api/rubrics/:id
-
-Retrieves a rubric by its ID.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the rubric.
--   **Response (200 OK):**
-
-    ```json
-    {
-        "id": 1,
-        "name": "New Rubric",
-        "description": "This is a new rubric.",
-        "projectId": 1,
-        "createdById": 1,
-        "status": "DRAFT",
-        "isTemplate": false,
-        "criteria": [
-            {
-                "id": 1,
-                "rubricId": 1,
-                "title": "Criterion 1",
-                "description": "Description for criterion 1",
-                "maxPoints": 10,
-                "levels": [
-                    {
-                        "id": 1,
-                        "criterionId": 1,
-                        "score": 10,
-                        "description": "Excellent"
-                    },
-                    {
-                        "id": 2,
-                        "criterionId": 1,
-                        "score": 5,
-                        "description": "Average"
-                    }
-                ]
-            }
-        ]
-    }
-    ```
-
-#### PUT /api/rubrics/:id
-
-Updates a rubric.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the rubric.
--   **Request Body:**
-
-    Any field of the rubric can be updated.
-
-    ```json
-    {
-        "name": "Updated Rubric Name",
-        "description": "This is an updated description.",
-        "isTemplate": true
-    }
-    ```
-
--   **Response (200 OK):**
-
-    ```json
-    {
-        "id": 1,
-        "name": "Updated Rubric Name",
-        "description": "This is a new rubric.",
-        "projectId": 1,
-        "createdById": 1,
-        "status": "DRAFT",
-        "isTemplate": false
-    }
-    ```
-
-#### DELETE /api/rubrics/:id
-
-Deletes a rubric.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the rubric.
--   **Response (204 No Content)**
-
-#### POST /api/rubrics/:id/duplicate
-
-Duplicates a rubric.
-
--   **Path Parameters:**
-    -   `id` (uint): The ID of the rubric to duplicate.
--   **Response (201 Created):**
-
-    ```json
-    {
-        "id": 2,
-        "name": "New Rubric (Copy)",
-        "description": "This is a new rubric.",
-        "projectId": 1,
-        "createdById": 1,
-        "status": "DRAFT",
-        "isTemplate": false
-    }
-    ```
+Los siguientes eventos son emitidos para las tareas:
+
+#### `task_created`
+
+- **Descripción:** Se emite cuando se crea una nueva tarea.
+- **Payload:** El objeto completo de la nueva tarea (`models.Task`).
+
+#### `task_status_updated`
+
+- **Descripción:** Se emite cuando el estado (columna del Kanban) de una tarea cambia.
+- **Payload:**
+  ```json
+  {
+    "taskId": 456,
+    "oldStatus": "todo",
+    "newStatus": "in_progress",
+    "updatedBy": {
+      "id": 123,
+      "name": "John Doe"
+    },
+    "timestamp": "2023-11-05T10:30:00Z"
+  }
+  ```
+
+#### `task_assigned`
+
+- **Descripción:** Se emite cuando una tarea es asignada a un usuario.
+- **Payload:**
+  ```json
+  {
+    "taskId": 456,
+    "assignedTo": {
+      "id": 789,
+      "name": "Jane Smith"
+    },
+    "assignedBy": {
+      "id": 123,
+      "name": "John Doe"
+    },
+    "timestamp": "2023-11-05T10:31:00Z"
+  }
+  ```
+
+#### `task_deleted`
+
+- **Descripción:** Se emite cuando una tarea es eliminada.
+- **Payload:**
+  ```json
+  {
+    "taskId": 789,
+    "deletedBy": {
+      "id": 123,
+      "name": "John Doe"
+    },
+    "timestamp": "2023-11-05T10:34:00Z"
+  }
+  ```
