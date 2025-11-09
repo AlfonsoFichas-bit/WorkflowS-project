@@ -10,6 +10,7 @@ interface UserStory {
   Title: string;
   Priority?: string;
   Points?: number | null;
+  SprintID?: number | null;
 }
 
 interface Task {
@@ -128,7 +129,13 @@ export default function KanbanBoardIsland(
       ws.on("connection_failed", () => setConnectionStatus("failed"));
 
       ws.on("task_status_updated", (payload) => {
-        const p = payload as { taskId: number; newStatus: Task["Status"] };
+        const p = payload as {
+          taskId: number;
+          newStatus: Task["Status"];
+          oldStatus: Task["Status"];
+          updatedBy: { id: number; name: string };
+          timestamp: string;
+        };
         setTasks((prev) =>
           prev.map((
             t,
@@ -136,38 +143,52 @@ export default function KanbanBoardIsland(
         );
       });
 
-      ws.on("task_updated", (payload) => {
-        const p = payload as { taskId: number; changes: Partial<Task> };
+      ws.on("task_assigned", (payload) => {
+        const p = payload as {
+          taskId: number;
+          assignedTo: { id: number; name: string };
+          assignedBy: { id: number; name: string };
+          timestamp: string;
+        };
         setTasks((prev) =>
-          prev.map((t) => (t.ID === p.taskId ? { ...t, ...p.changes } : t))
+          prev.map((
+            t,
+          ) => (t.ID === p.taskId
+            ? {
+              ...t,
+              AssignedTo: { ID: p.assignedTo.id, Nombre: p.assignedTo.name },
+            }
+            : t)
+          )
         );
       });
 
       ws.on("task_created", (payload) => {
-        const p = payload as { task: Task };
-        // Sólo añadir si pertenece al sprint activo
-        if (p.task && sprint) {
+        const p = payload as { task: Task; timestamp: string };
+        // Solo añadir si pertenece al sprint activo
+        if (
+          p.task && p.task.UserStory && p.task.UserStory.SprintID === sprint?.ID
+        ) {
           setTasks((prev) => [...prev, p.task]);
         }
       });
 
       ws.on("task_deleted", (payload) => {
-        const p = payload as { taskId: number };
+        const p = payload as {
+          taskId: number;
+          deletedBy: { id: number; name: string };
+          timestamp: string;
+        };
         setTasks((prev) => prev.filter((t) => t.ID !== p.taskId));
       });
 
       ws.connect();
-      // Suscribirse al proyecto si el sprint está disponible
-      if (sprint) {
-        // Nota: Si el backend lo requiere, enviar subscribe_project con projectId
-        // ws.subscribeToProject(sprint.ProjectID)
-      }
 
       return () => {
         ws.disconnect();
       };
     });
-  }, [projectId, sprint?.ID]);
+  }, [projectId]); // Conectar solo una vez por proyecto, no por sprint
 
   const onDropTo = async (e: DragEvent, status: Task["Status"]) => {
     e.preventDefault();

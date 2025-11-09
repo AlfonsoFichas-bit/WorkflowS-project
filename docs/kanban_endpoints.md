@@ -3,12 +3,16 @@
 ## Endpoints Implementados
 
 ### 1. GET /api/sprints/:sprintId/tasks
-**Descripción**: Obtiene todas las tareas de un sprint específico con sus relaciones completas.
+
+**Descripción**: Obtiene todas las tareas de un sprint específico con sus
+relaciones completas.
 
 **Parámetros**:
+
 - `sprintId` (path): ID del sprint
 
 **Respuesta**:
+
 ```json
 [
   {
@@ -40,17 +44,21 @@
 ]
 ```
 
-**Uso para Kanban**: Este endpoint proporciona todas las tareas necesarias para el tablero Kanban de un sprint.
+**Uso para Kanban**: Este endpoint proporciona todas las tareas necesarias para
+el tablero Kanban de un sprint.
 
 ---
 
 ### 2. GET /api/projects/:id/active-sprint
+
 **Descripción**: Obtiene el sprint actualmente activo de un proyecto.
 
 **Parámetros**:
+
 - `id` (path): ID del proyecto
 
 **Respuesta**:
+
 ```json
 {
   "id": 2,
@@ -72,17 +80,21 @@
 }
 ```
 
-**Uso para Kanban**: Permite identificar automáticamente qué sprint mostrar en el tablero Kanban.
+**Uso para Kanban**: Permite identificar automáticamente qué sprint mostrar en
+el tablero Kanban.
 
 ---
 
 ### 3. PUT /api/sprints/:sprintId/status
+
 **Descripción**: Actualiza el estado de un sprint.
 
 **Parámetros**:
+
 - `sprintId` (path): ID del sprint
 
 **Body**:
+
 ```json
 {
   "status": "active"
@@ -90,12 +102,14 @@
 ```
 
 **Estados Válidos**:
+
 - `planned`: Sprint planificado
 - `active`: Sprint activo actualmente
 - `completed`: Sprint finalizado
 - `cancelled`: Sprint cancelado
 
 **Respuesta**:
+
 ```json
 {
   "id": 2,
@@ -105,23 +119,27 @@
 }
 ```
 
-**Uso para Kanban**: Permite cambiar el estado del sprint (ej: de planned a active).
+**Uso para Kanban**: Permite cambiar el estado del sprint (ej: de planned a
+active).
 
 ---
 
 ## Flujo de Uso para Kanban
 
 ### 1. Obtener Sprint Activo
+
 ```bash
 GET /api/projects/1/active-sprint
 ```
 
 ### 2. Cargar Tareas del Sprint
+
 ```bash
 GET /api/sprints/2/tasks
 ```
 
 ### 3. Actualizar Estados de Tareas (usando endpoints existentes)
+
 ```bash
 PUT /api/tasks/123/status
 {
@@ -130,6 +148,7 @@ PUT /api/tasks/123/status
 ```
 
 ### 4. Actualizar Estado del Sprint (opcional)
+
 ```bash
 PUT /api/sprints/2/status
 {
@@ -142,11 +161,14 @@ PUT /api/sprints/2/status
 ## Optimizaciones Implementadas
 
 ### Query Optimizada para Sprint Tasks
+
 - **JOIN directo** entre tasks y user_stories
-- **Preloading** de relaciones necesarias (AssignedTo, CreatedBy, UserStory, Project)
+- **Preloading** de relaciones necesarias (AssignedTo, CreatedBy, UserStory,
+  Project)
 - **Ordenamiento** por fecha de creación
 
 ### Estado del Sprint
+
 - **Búsqueda eficiente** por project_id y status
 - **Preloading** de relaciones (CreatedBy, Project)
 
@@ -155,11 +177,13 @@ PUT /api/sprints/2/status
 ## Pruebas Implementadas
 
 ### Tests Unitarios
+
 - `TestSprintService_GetSprintTasks_Structure`: Verifica estructura del método
 - `TestSprintService_UpdateSprintStatus_Structure`: Verifica firma del método
 - `TestUpdateSprintStatusRequest_Validation`: Validación de estados
 
 ### Calidad de Código
+
 - **golangci-lint**: 0 issues
 - **Compilación**: Exitosa
 - **Tests**: Pasando correctamente
@@ -177,9 +201,14 @@ Con estos endpoints implementados, la base para el Kanban está lista:
 
 ### Actualizaciones en Tiempo Real (WebSockets)
 
-- ✅ **WebSocket integration para actualizaciones en tiempo real**: ¡Implementado! Las acciones como crear, actualizar estado, asignar o eliminar una tarea ahora emiten eventos a través de WebSockets para actualizar el tablero en todos los clientes conectados. Para más detalles sobre los eventos, ver `api_documentation.md`.
+- ✅ **WebSocket integration para actualizaciones en tiempo real**:
+  ¡Implementado! Las acciones como crear, actualizar estado, asignar o eliminar
+  una tarea ahora emiten eventos a través de WebSockets para actualizar el
+  tablero en todos los clientes conectados. Para más detalles sobre los eventos,
+  ver `api_documentation.md`.
 
 **Lo que falta para Kanban completo**:
+
 - Frontend del tablero Kanban
 - Drag & drop functionality
 - Métricas del sprint
@@ -190,23 +219,23 @@ Con estos endpoints implementados, la base para el Kanban está lista:
 
 ```javascript
 // 1. Obtener sprint activo
-const activeSprint = await fetch('/api/projects/1/active-sprint');
+const activeSprint = await fetch("/api/projects/1/active-sprint");
 
 // 2. Cargar tareas del sprint
 const tasks = await fetch(`/api/sprints/${activeSprint.id}/tasks`);
 
 // 3. Organizar tareas por estado para Kanban
 const kanbanColumns = {
-  todo: tasks.filter(task => task.status === 'todo'),
-  in_progress: tasks.filter(task => task.status === 'in_progress'),
-  in_review: tasks.filter(task => task.status === 'in_review'),
-  done: tasks.filter(task => task.status === 'done')
+  todo: tasks.filter((task) => task.status === "todo"),
+  in_progress: tasks.filter((task) => task.status === "in_progress"),
+  in_review: tasks.filter((task) => task.status === "in_review"),
+  done: tasks.filter((task) => task.status === "done"),
 };
 
 // 4. Actualizar estado cuando se mueve una tarea
 await fetch(`/api/tasks/${taskId}/status`, {
-  method: 'PUT',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ status: 'in_progress' })
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ status: "in_progress" }),
 });
 ```

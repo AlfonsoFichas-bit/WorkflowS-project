@@ -170,8 +170,12 @@ export default function SprintManagementIsland() {
         ID: editingSprint.ID,
         Name: name,
         Goal: description,
-        StartDate: startDate ? new Date(startDate).toISOString() : editingSprint.StartDate,
-        EndDate: endDate ? new Date(endDate).toISOString() : editingSprint.EndDate,
+        StartDate: startDate
+          ? new Date(startDate).toISOString()
+          : editingSprint.StartDate,
+        EndDate: endDate
+          ? new Date(endDate).toISOString()
+          : editingSprint.EndDate,
         Status: status,
         ProjectID: editingSprint.ProjectID, // Incluir el ProjectID original
         CreatedAt: editingSprint.CreatedAt, // Incluir fecha de creación original
@@ -203,7 +207,9 @@ export default function SprintManagementIsland() {
       } else {
         const errorData = await response.json();
         console.error("Error del backend:", errorData);
-        setMessage(errorData.error || errorData.message || "Error al actualizar sprint");
+        setMessage(
+          errorData.error || errorData.message || "Error al actualizar sprint",
+        );
       }
     } catch (_err) {
       console.error("Error de conexión:", _err);
@@ -301,7 +307,9 @@ export default function SprintManagementIsland() {
       } else {
         const errorData = await response.json();
         console.error("Error del backend:", errorData);
-        setMessage(errorData.error || errorData.message || "Error al crear sprint");
+        setMessage(
+          errorData.error || errorData.message || "Error al crear sprint",
+        );
       }
     } catch (_err) {
       console.error("Error de conexión:", _err);
@@ -317,7 +325,8 @@ export default function SprintManagementIsland() {
   };
 
   const canCreateSprint = (role: string) => {
-    return role === "admin" || role === "scrum_master" || role === "product_owner";
+    return role === "admin" || role === "scrum_master" ||
+      role === "product_owner";
   };
 
   useEffect(() => {
@@ -383,19 +392,23 @@ export default function SprintManagementIsland() {
         </div>
       </div>
 
-      {!selectedProject ? (
-        <div class="text-center py-8">
-          <p class="text-gray-600 dark:text-gray-400">
-            Selecciona un proyecto para gestionar sus sprints
-          </p>
-        </div>
-      ) : !canCreateSprint(userRole) ? (
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
-          <p class="text-yellow-800 dark:text-yellow-200">
-            Solo Scrum Master y Product Owner pueden crear sprints
-          </p>
-        </div>
-      ) : null}
+      {!selectedProject
+        ? (
+          <div class="text-center py-8">
+            <p class="text-gray-600 dark:text-gray-400">
+              Selecciona un proyecto para gestionar sus sprints
+            </p>
+          </div>
+        )
+        : !canCreateSprint(userRole)
+        ? (
+          <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+            <p class="text-yellow-800 dark:text-yellow-200">
+              Solo Scrum Master y Product Owner pueden crear sprints
+            </p>
+          </div>
+        )
+        : null}
 
       <Modal
         show={showModal}
@@ -687,8 +700,13 @@ export default function SprintManagementIsland() {
                         </span>
                       </div>
                       <div class="text-sm text-gray-500 dark:text-gray-400">
-                        <p>Inicio: {new Date(sprint.StartDate).toLocaleDateString()}</p>
-                        <p>Fin: {new Date(sprint.EndDate).toLocaleDateString()}</p>
+                        <p>
+                          Inicio:{" "}
+                          {new Date(sprint.StartDate).toLocaleDateString()}
+                        </p>
+                        <p>
+                          Fin: {new Date(sprint.EndDate).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
                     <div class="flex justify-end space-x-2">

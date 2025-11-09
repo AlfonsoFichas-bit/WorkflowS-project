@@ -686,7 +686,9 @@ export default function ProjectsIsland() {
                       title="Abrir Kanban"
                       onClick={() => {
                         // Forzar navegación full-page para evitar que la SPA intercepte la ruta
-                        globalThis.location.assign(`/dashboard/projects/${project.ID}/kanban`);
+                        globalThis.location.assign(
+                          `/dashboard/projects/${project.ID}/kanban`,
+                        );
                       }}
                     >
                       <MaterialSymbol icon="view_kanban" className="icon-md" />

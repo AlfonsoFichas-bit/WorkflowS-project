@@ -1,9 +1,12 @@
 # Frontend Kanban Implementation Guide
 
 ## Overview
-This guide provides complete instructions for implementing a Kanban board frontend that integrates with the existing backend API.
+
+This guide provides complete instructions for implementing a Kanban board
+frontend that integrates with the existing backend API.
 
 ## Prerequisites
+
 - Backend API running on `http://localhost:8080`
 - Valid JWT token for authentication
 - Modern frontend framework (React, Vue, Angular recommended)
@@ -13,48 +16,51 @@ This guide provides complete instructions for implementing a Kanban board fronte
 ### 1. Core Components Needed
 
 #### KanbanBoard Component
+
 ```javascript
 // Main container for the Kanban board
 const KanbanBoard = ({ projectId }) => {
-  const [sprint, setSprint] = useState(null)
-  const [tasks, setTasks] = useState([])
+  const [sprint, setSprint] = useState(null);
+  const [tasks, setTasks] = useState([]);
   const [columns, setColumns] = useState([
-    { id: 'todo', title: 'To Do', status: 'todo' },
-    { id: 'in_progress', title: 'In Progress', status: 'in_progress' },
-    { id: 'done', title: 'Done', status: 'done' }
-  ])
-  
+    { id: "todo", title: "To Do", status: "todo" },
+    { id: "in_progress", title: "In Progress", status: "in_progress" },
+    { id: "done", title: "Done", status: "done" },
+  ]);
+
   // Load active sprint and tasks
   useEffect(() => {
-    loadActiveSprint()
-    loadSprintTasks()
-  }, [projectId])
-}
+    loadActiveSprint();
+    loadSprintTasks();
+  }, [projectId]);
+};
 ```
 
 #### KanbanColumn Component
+
 ```javascript
 // Individual column for each status
 const KanbanColumn = ({ column, tasks, onTaskMove }) => {
-  const columnTasks = tasks.filter(task => task.Status === column.status)
-  
+  const columnTasks = tasks.filter((task) => task.Status === column.status);
+
   return (
     <div className="kanban-column">
       <h3>{column.title}</h3>
-      {columnTasks.map(task => (
+      {columnTasks.map((task) => (
         <KanbanCard key={task.ID} task={task} onMove={onTaskMove} />
       ))}
     </div>
-  )
-}
+  );
+};
 ```
 
 #### KanbanCard Component
+
 ```javascript
 // Individual task card
 const KanbanCard = ({ task, onMove }) => {
   return (
-    <div 
+    <div
       className="kanban-card"
       draggable
       onDragStart={(e) => handleDragStart(e, task)}
@@ -71,85 +77,89 @@ const KanbanCard = ({ task, onMove }) => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
 ```
 
 ### 2. API Integration
 
 #### API Service Layer
+
 ```javascript
 // api/kanbanService.js
-const API_BASE = 'http://localhost:8080'
+const API_BASE = "http://localhost:8080";
 
 class KanbanService {
   constructor(token) {
-    this.token = token
+    this.token = token;
   }
 
   async getActiveSprint(projectId) {
-    const response = await fetch(`${API_BASE}/api/projects/${projectId}/active-sprint`, {
-      headers: {
-        'Authorization': `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    
+    const response = await fetch(
+      `${API_BASE}/api/projects/${projectId}/active-sprint`,
+      {
+        headers: {
+          "Authorization": `Bearer ${this.token}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
     if (!response.ok) {
-      if (response.status === 404) return null
-      throw new Error('Failed to fetch active sprint')
+      if (response.status === 404) return null;
+      throw new Error("Failed to fetch active sprint");
     }
-    
-    return response.json()
+
+    return response.json();
   }
 
   async getSprintTasks(sprintId) {
     const response = await fetch(`${API_BASE}/api/sprints/${sprintId}/tasks`, {
       headers: {
-        'Authorization': `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    
+        "Authorization": `Bearer ${this.token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
     if (!response.ok) {
-      throw new Error('Failed to fetch sprint tasks')
+      throw new Error("Failed to fetch sprint tasks");
     }
-    
-    return response.json()
+
+    return response.json();
   }
 
   async updateTaskStatus(taskId, newStatus) {
     const response = await fetch(`${API_BASE}/api/tasks/${taskId}/status`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Authorization': `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
+        "Authorization": `Bearer ${this.token}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ status: newStatus })
-    })
-    
+      body: JSON.stringify({ status: newStatus }),
+    });
+
     if (!response.ok) {
-      throw new Error('Failed to update task status')
+      throw new Error("Failed to update task status");
     }
-    
-    return response.json()
+
+    return response.json();
   }
 
   async updateSprintStatus(sprintId, newStatus) {
     const response = await fetch(`${API_BASE}/api/sprints/${sprintId}/status`, {
-      method: 'PUT',
+      method: "PUT",
       headers: {
-        'Authorization': `Bearer ${this.token}`,
-        'Content-Type': 'application/json'
+        "Authorization": `Bearer ${this.token}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ status: newStatus })
-    })
-    
+      body: JSON.stringify({ status: newStatus }),
+    });
+
     if (!response.ok) {
-      throw new Error('Failed to update sprint status')
+      throw new Error("Failed to update sprint status");
     }
-    
-    return response.json()
+
+    return response.json();
   }
 }
 ```
@@ -157,98 +167,106 @@ class KanbanService {
 ### 3. State Management
 
 #### React Context Example
+
 ```javascript
 // contexts/KanbanContext.js
-const KanbanContext = createContext()
+const KanbanContext = createContext();
 
 export const KanbanProvider = ({ children }) => {
-  const [sprint, setSprint] = useState(null)
-  const [tasks, setTasks] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const [sprint, setSprint] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const kanbanService = new KanbanService(localStorage.getItem('jwt_token'))
+  const kanbanService = new KanbanService(localStorage.getItem("jwt_token"));
 
   const loadActiveSprint = async (projectId) => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const activeSprint = await kanbanService.getActiveSprint(projectId)
-      setSprint(activeSprint)
+      const activeSprint = await kanbanService.getActiveSprint(projectId);
+      setSprint(activeSprint);
       if (activeSprint) {
-        const sprintTasks = await kanbanService.getSprintTasks(activeSprint.ID)
-        setTasks(sprintTasks)
+        const sprintTasks = await kanbanService.getSprintTasks(activeSprint.ID);
+        setTasks(sprintTasks);
       }
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const moveTask = async (taskId, newStatus) => {
     try {
-      const updatedTask = await kanbanService.updateTaskStatus(taskId, newStatus)
-      setTasks(prev => prev.map(task => 
-        task.ID === taskId ? updatedTask : task
-      ))
+      const updatedTask = await kanbanService.updateTaskStatus(
+        taskId,
+        newStatus,
+      );
+      setTasks((prev) =>
+        prev.map((task) => task.ID === taskId ? updatedTask : task)
+      );
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     }
-  }
+  };
 
   return (
-    <KanbanContext.Provider value={{
-      sprint,
-      tasks,
-      loading,
-      error,
-      loadActiveSprint,
-      moveTask
-    }}>
+    <KanbanContext.Provider
+      value={{
+        sprint,
+        tasks,
+        loading,
+        error,
+        loadActiveSprint,
+        moveTask,
+      }}
+    >
       {children}
     </KanbanContext.Provider>
-  )
-}
+  );
+};
 ```
 
 ### 4. Drag & Drop Implementation
 
 #### HTML5 Drag & Drop
+
 ```javascript
 // hooks/useDragAndDrop.js
 export const useDragAndDrop = (onTaskMove) => {
-  const [draggedTask, setDraggedTask] = useState(null)
+  const [draggedTask, setDraggedTask] = useState(null);
 
   const handleDragStart = (e, task) => {
-    setDraggedTask(task)
-    e.dataTransfer.effectAllowed = 'move'
-  }
+    setDraggedTask(task);
+    e.dataTransfer.effectAllowed = "move";
+  };
 
   const handleDragOver = (e) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-  }
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
 
   const handleDrop = (e, targetStatus) => {
-    e.preventDefault()
+    e.preventDefault();
     if (draggedTask && draggedTask.Status !== targetStatus) {
-      onTaskMove(draggedTask.ID, targetStatus)
+      onTaskMove(draggedTask.ID, targetStatus);
     }
-    setDraggedTask(null)
-  }
+    setDraggedTask(null);
+  };
 
   return {
     handleDragStart,
     handleDragOver,
     handleDrop,
-    draggedTask
-  }
-}
+    draggedTask,
+  };
+};
 ```
 
 ### 5. Styling
 
 #### CSS for Kanban Board
+
 ```css
 /* KanbanBoard.css */
 .kanban-board {
@@ -284,7 +302,7 @@ export const useDragAndDrop = (onTaskMove) => {
 }
 
 .kanban-card:hover {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
 }
 
@@ -307,9 +325,18 @@ export const useDragAndDrop = (onTaskMove) => {
   font-weight: 600;
 }
 
-.priority.high { background: #ffebee; color: #c62828; }
-.priority.medium { background: #fff3e0; color: #ef6c00; }
-.priority.low { background: #e8f5e8; color: #2e7d32; }
+.priority.high {
+  background: #ffebee;
+  color: #c62828;
+}
+.priority.medium {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+.priority.low {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
 
 .points {
   background: #e3f2fd;
@@ -331,6 +358,7 @@ export const useDragAndDrop = (onTaskMove) => {
 ## 🚀 Implementation Steps
 
 ### Step 1: Setup Project Structure
+
 ```
 frontend/
 ├── src/
@@ -349,6 +377,7 @@ frontend/
 ```
 
 ### Step 2: Install Dependencies
+
 ```bash
 # For React
 npm install axios
@@ -361,23 +390,27 @@ npm install axios
 ```
 
 ### Step 3: Implement Core Components
+
 1. Create `KanbanService` for API calls
 2. Build `KanbanCard` component with drag & drop
 3. Create `KanbanColumn` component
 4. Implement main `KanbanBoard` component
 
 ### Step 4: Add State Management
+
 1. Create context/store for Kanban state
 2. Implement loading and error states
 3. Add optimistic updates for better UX
 
 ### Step 5: Style the Components
+
 1. Add responsive design
 2. Implement hover states and transitions
 3. Add loading indicators
 4. Style error states
 
 ### Step 6: Add Advanced Features
+
 1. Task filtering and search
 2. Sprint metrics and burndown chart
 3. Real-time updates (WebSocket)
@@ -386,35 +419,36 @@ npm install axios
 ## 🔄 WebSocket Integration (Optional but Recommended)
 
 ### WebSocket Service
+
 ```javascript
 // services/websocketService.js
 class WebSocketService {
   constructor(token) {
-    this.token = token
-    this.ws = null
-    this.listeners = {}
+    this.token = token;
+    this.ws = null;
+    this.listeners = {};
   }
 
   connect() {
-    this.ws = new WebSocket(`ws://localhost:8080/ws?token=${this.token}`)
-    
+    this.ws = new WebSocket(`ws://localhost:8080/ws?token=${this.token}`);
+
     this.ws.onmessage = (event) => {
-      const data = JSON.parse(event.data)
-      this.handleMessage(data)
-    }
+      const data = JSON.parse(event.data);
+      this.handleMessage(data);
+    };
   }
 
   on(event, callback) {
     if (!this.listeners[event]) {
-      this.listeners[event] = []
+      this.listeners[event] = [];
     }
-    this.listeners[event].push(callback)
+    this.listeners[event].push(callback);
   }
 
   handleMessage(data) {
-    const { type, payload } = data
+    const { type, payload } = data;
     if (this.listeners[type]) {
-      this.listeners[type].forEach(callback => callback(payload))
+      this.listeners[type].forEach((callback) => callback(payload));
     }
   }
 }
@@ -423,42 +457,46 @@ class WebSocketService {
 ## 📱 Mobile Considerations
 
 ### Responsive Design
+
 - Use CSS Grid/Flexbox for responsive layout
 - Touch-friendly drag & drop for mobile
 - Horizontal scroll for columns on small screens
 - Collapsible columns on mobile
 
 ### Touch Events
+
 ```javascript
 // Add touch support for mobile
 const handleTouchStart = (e, task) => {
   // Implement touch-based drag
-}
+};
 
 const handleTouchMove = (e) => {
   // Handle touch movement
-}
+};
 
 const handleTouchEnd = (e) => {
   // Handle touch end
-}
+};
 ```
 
 ## 🧪 Testing
 
 ### Unit Tests
+
 ```javascript
 // Example test for KanbanService
-describe('KanbanService', () => {
-  test('should fetch active sprint', async () => {
-    const service = new KanbanService('fake-token')
-    const sprint = await service.getActiveSprint(1)
-    expect(sprint).toBeDefined()
-  })
-})
+describe("KanbanService", () => {
+  test("should fetch active sprint", async () => {
+    const service = new KanbanService("fake-token");
+    const sprint = await service.getActiveSprint(1);
+    expect(sprint).toBeDefined();
+  });
+});
 ```
 
 ### Integration Tests
+
 - Test drag & drop functionality
 - Test API integration
 - Test error handling
@@ -476,12 +514,14 @@ describe('KanbanService', () => {
 ## 🔧 Troubleshooting
 
 ### Common Issues
+
 1. **CORS Errors**: Ensure backend allows frontend origin
 2. **Authentication**: Check JWT token is properly stored and sent
 3. **Drag & Drop**: Test on different browsers and devices
 4. **Performance**: Monitor bundle size and implement code splitting
 
 ### Debug Tips
+
 - Use browser dev tools to inspect API calls
 - Add console logging for drag & drop events
 - Test with different screen sizes
@@ -489,7 +529,11 @@ describe('KanbanService', () => {
 
 ## 📚 Additional Resources
 
-- [React DnD](https://react-dnd.github.io/react-dnd/) - Advanced drag & drop for React
-- [Vue.Draggable](https://github.com/SortableJS/Vue.Draggable) - Drag & drop for Vue
-- [ng2-dragula](https://github.com/valor-software/ng2-dragula) - Drag & drop for Angular
-- [HTML5 Drag & Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API) - Native browser API
+- [React DnD](https://react-dnd.github.io/react-dnd/) - Advanced drag & drop for
+  React
+- [Vue.Draggable](https://github.com/SortableJS/Vue.Draggable) - Drag & drop for
+  Vue
+- [ng2-dragula](https://github.com/valor-software/ng2-dragula) - Drag & drop for
+  Angular
+- [HTML5 Drag & Drop API](https://developer.mozilla.org/en-US/docs/Web/API/HTML_Drag_and_Drop_API) -
+  Native browser API

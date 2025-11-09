@@ -42,7 +42,9 @@ export default function UserStoriesIsland() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [sprints, setSprints] = useState<Sprint[]>([]);
   const [userStories, setUserStories] = useState<UserStory[]>([]);
-  const [filteredUserStories, setFilteredUserStories] = useState<UserStory[]>([]);
+  const [filteredUserStories, setFilteredUserStories] = useState<UserStory[]>(
+    [],
+  );
   const [loadingUserStories, setLoadingUserStories] = useState(false);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -50,8 +52,12 @@ export default function UserStoriesIsland() {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAssignModal, setShowAssignModal] = useState(false);
-  const [editingUserStory, setEditingUserStory] = useState<UserStory | null>(null);
-  const [assigningUserStory, setAssigningUserStory] = useState<UserStory | null>(null);
+  const [editingUserStory, setEditingUserStory] = useState<UserStory | null>(
+    null,
+  );
+  const [assigningUserStory, setAssigningUserStory] = useState<
+    UserStory | null
+  >(null);
   const [userRole, setUserRole] = useState<string>("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -192,22 +198,32 @@ export default function UserStoriesIsland() {
     }
 
     try {
-      const updatedUserStory = {
-        ID: editingUserStory.ID,
+      const updatedUserStory: Partial<UserStory> = {
         Title: title,
         Description: description,
         AcceptanceCriteria: acceptanceCriteria,
         Priority: priority,
-        Status: editingUserStory.Status,
-        Points: points,
-        ProjectID: editingUserStory.ProjectID,
-        SprintID: editingUserStory.SprintID,
-        CreatedByID: editingUserStory.CreatedByID,
-        CreatedAt: editingUserStory.CreatedAt,
-        UpdatedAt: new Date().toISOString(),
       };
 
-      console.log("Enviando datos actualizados de la user story:", updatedUserStory);
+      if (points !== null) {
+        updatedUserStory.Points = points;
+      }
+
+      console.log(
+        "Enviando datos actualizados de la user story:",
+        updatedUserStory,
+      );
+      console.log("Prioridad actual:", priority);
+      console.log("ID de la user story:", editingUserStory.ID);
+
+      console.log(
+        "URL del endpoint:",
+        `http://localhost:8080/api/userstories/${editingUserStory.ID}`,
+      );
+      console.log("Headers:", {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      });
 
       const response = await fetch(
         `http://localhost:8080/api/userstories/${editingUserStory.ID}`,
@@ -221,18 +237,50 @@ export default function UserStoriesIsland() {
         },
       );
 
+      console.log("Status de respuesta:", response.status);
+      console.log(
+        "Headers de respuesta:",
+        Object.fromEntries(response.headers.entries()),
+      );
+
       if (response.ok) {
+        const updatedData = await response.json();
+        console.log("Respuesta del backend:", updatedData);
+
+        // Validate that the update was successful
+        if (updatedData.Priority !== updatedUserStory.Priority) {
+          console.error(
+            "Error: Priority not updated correctly. Sent:",
+            updatedUserStory.Priority,
+            "Received:",
+            updatedData.Priority,
+          );
+          setMessage(
+            "Error: La prioridad no se actualizó correctamente. Inténtalo de nuevo.",
+          );
+          setLoading(false);
+          return;
+        }
+
         setMessage("User Story actualizada exitosamente");
         setShowEditModal(false);
         setEditingUserStory(null);
         if (selectedProject) {
-          fetchUserStories(selectedProject.ID);
+          console.log(
+            "Recargando user stories del proyecto:",
+            selectedProject.ID,
+          );
+          await fetchUserStories(selectedProject.ID);
+          console.log("User stories recargadas:", userStories);
         }
         setTimeout(() => setMessage(""), 3000);
       } else {
         const errorData = await response.json();
         console.error("Error del backend:", errorData);
-        setMessage(errorData.error || errorData.message || "Error al actualizar user story");
+        setMessage(
+          errorData.error || errorData.message ||
+            "Error al actualizar user story",
+        );
       }
     } catch (_err) {
       console.error("Error de conexión:", _err);
@@ -329,7 +377,9 @@ export default function UserStoriesIsland() {
       } else {
         const errorData = await response.json();
         console.error("Error del backend:", errorData);
-        setMessage(errorData.error || errorData.message || "Error al crear user story");
+        setMessage(
+          errorData.error || errorData.message || "Error al crear user story",
+        );
       }
     } catch (_err) {
       console.error("Error de conexión:", _err);
@@ -395,14 +445,17 @@ export default function UserStoriesIsland() {
   };
 
   const canCreateUserStory = (role: string) => {
-    return role === "admin" || role === "scrum_master" || role === "product_owner";
+    return role === "admin" || role === "scrum_master" ||
+      role === "product_owner";
   };
 
   useEffect(() => {
     const filtered = userStories.filter((userStory) =>
       userStory.Title.toLowerCase().includes(search.toLowerCase()) ||
       userStory.Description?.toLowerCase().includes(search.toLowerCase()) ||
-      userStory.AcceptanceCriteria?.toLowerCase().includes(search.toLowerCase()) ||
+      userStory.AcceptanceCriteria?.toLowerCase().includes(
+        search.toLowerCase(),
+      ) ||
       userStory.Priority.toLowerCase().includes(search.toLowerCase()) ||
       userStory.Status.toLowerCase().includes(search.toLowerCase())
     );
@@ -489,19 +542,23 @@ export default function UserStoriesIsland() {
         </div>
       </div>
 
-      {!selectedProject ? (
-        <div class="text-center py-8">
-          <p class="text-gray-600 dark:text-gray-400">
-            Selecciona un proyecto para gestionar sus user stories
-          </p>
-        </div>
-      ) : !canCreateUserStory(userRole) ? (
-        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
-          <p class="text-yellow-800 dark:text-yellow-200">
-            Solo Scrum Master y Product Owner pueden crear user stories
-          </p>
-        </div>
-      ) : null}
+      {!selectedProject
+        ? (
+          <div class="text-center py-8">
+            <p class="text-gray-600 dark:text-gray-400">
+              Selecciona un proyecto para gestionar sus user stories
+            </p>
+          </div>
+        )
+        : !canCreateUserStory(userRole)
+        ? (
+          <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-4">
+            <p class="text-yellow-800 dark:text-yellow-200">
+              Solo Scrum Master y Product Owner pueden crear user stories
+            </p>
+          </div>
+        )
+        : null}
 
       <Modal
         show={showModal}
@@ -599,7 +656,11 @@ export default function UserStoriesIsland() {
                   min="0"
                   value={points || ""}
                   onChange={(e) =>
-                    setPoints((e.target as HTMLInputElement).value ? Number((e.target as HTMLInputElement).value) : null)}
+                    setPoints(
+                      (e.target as HTMLInputElement).value
+                        ? Number((e.target as HTMLInputElement).value)
+                        : null,
+                    )}
                 />
               </div>
             </div>
@@ -711,7 +772,11 @@ export default function UserStoriesIsland() {
                   min="0"
                   value={points || ""}
                   onChange={(e) =>
-                    setPoints((e.target as HTMLInputElement).value ? Number((e.target as HTMLInputElement).value) : null)}
+                    setPoints(
+                      (e.target as HTMLInputElement).value
+                        ? Number((e.target as HTMLInputElement).value)
+                        : null,
+                    )}
                 />
               </div>
             </div>
@@ -754,17 +819,21 @@ export default function UserStoriesIsland() {
                 id="sprint"
                 value={selectedSprint || ""}
                 onChange={(e) =>
-                  setSelectedSprint(Number((e.target as HTMLSelectElement).value))}
+                  setSelectedSprint(
+                    Number((e.target as HTMLSelectElement).value),
+                  )}
                 required
               >
                 <option value="">Seleccionar Sprint</option>
                 {sprints
-                  .filter(sprint => sprint.Status === "planned" || sprint.Status === "active")
+                  .filter((sprint) =>
+                    sprint.Status === "planned" || sprint.Status === "active"
+                  )
                   .map((sprint) => (
-                  <option key={sprint.ID} value={sprint.ID}>
-                    {sprint.Name}
-                  </option>
-                ))}
+                    <option key={sprint.ID} value={sprint.ID}>
+                      {sprint.Name}
+                    </option>
+                  ))}
               </select>
             </div>
             {message && (
@@ -827,17 +896,21 @@ export default function UserStoriesIsland() {
                     <div class="space-y-2 mb-4">
                       <div class="flex justify-between items-center">
                         <span
-                          class={`px-2 py-1 rounded-full text-xs font-medium ${getPriorityColor(
-                            userStory.Priority,
-                          )}`}
+                          class={`px-2 py-1 rounded-full text-xs font-medium ${
+                            getPriorityColor(
+                              userStory.Priority,
+                            )
+                          }`}
                         >
                           {userStory.Priority.charAt(0).toUpperCase() +
                             userStory.Priority.slice(1)}
                         </span>
                         <span
-                          class={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                            userStory.Status,
-                          )}`}
+                          class={`px-2 py-1 rounded-full text-xs font-medium ${
+                            getStatusColor(
+                              userStory.Status,
+                            )
+                          }`}
                         >
                           {userStory.Status === "backlog"
                             ? "Backlog"
@@ -858,7 +931,10 @@ export default function UserStoriesIsland() {
                         </div>
                       )}
                       <div class="text-sm text-gray-500 dark:text-gray-400">
-                        <p>Creada: {new Date(userStory.CreatedAt).toLocaleDateString()}</p>
+                        <p>
+                          Creada:{" "}
+                          {new Date(userStory.CreatedAt).toLocaleDateString()}
+                        </p>
                       </div>
                     </div>
                     <div class="flex justify-end space-x-2">

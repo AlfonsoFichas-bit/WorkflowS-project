@@ -5,7 +5,10 @@ import UserManagementIsland from "./UserManagementIsland.tsx";
 import ProjectsIsland from "./ProjectsIsland.tsx";
 import SprintManagementIsland from "./SprintManagementIsland.tsx";
 import UserStoriesIsland from "./UserStoriesIsland.tsx";
-import TasksManagementIsland, { TasksProvider } from "./TasksManagementIsland.tsx";
+import SprintAssignmentIsland from "./SprintAssignmentIsland.tsx";
+import TasksManagementIsland, {
+  TasksProvider,
+} from "./TasksManagementIsland.tsx";
 
 interface RouteDef {
   path: string; // e.g. "/dashboard", "/dashboard/projects"
@@ -152,6 +155,20 @@ export default function DashboardSpaIsland() {
             }]}
           />
           <UserManagementIsland />
+        </div>
+      ),
+    },
+    {
+      path: "/dashboard/sprint-assignment",
+      title: "Asignación de Sprints",
+      render: () => (
+        <div class="max-w-7xl mx-auto">
+          <Breadcrumbs
+            breadcrumbs={[{ title: "Dashboard", href: "/dashboard" }, {
+              title: "Asignación de Sprints",
+            }]}
+          />
+          <SprintAssignmentIsland />
         </div>
       ),
     },

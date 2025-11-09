@@ -16,7 +16,9 @@ async function apiFetch<T>(url: string, init?: RequestInit): Promise<T> {
   });
   if (!res.ok) {
     let detail = "";
-    try { detail = await res.text(); } catch {
+    try {
+      detail = await res.text();
+    } catch {
       // Ignore error when getting response text
     }
     throw new Error(detail || `Request failed ${res.status}`);
@@ -98,7 +100,9 @@ interface TasksContextType {
   userStories: UserStory[];
   loading: boolean;
   error: string | null;
-  createTask: (task: Omit<Task, "id" | "createdAt" | "updatedAt">) => Promise<void>;
+  createTask: (
+    task: Omit<Task, "id" | "createdAt" | "updatedAt">,
+  ) => Promise<void>;
   updateTask: (id: string, updates: Partial<Task>) => Promise<void>;
   deleteTask: (id: string) => Promise<void>;
   assignTask: (taskId: string, assigneeId: string) => Promise<void>;
@@ -122,14 +126,18 @@ interface TasksProviderProps {
   sprintId?: string;
 }
 
-export function TasksProvider({ children, projectId, userRole, userStoryId, sprintId }: TasksProviderProps) {
+export function TasksProvider(
+  { children, projectId, userRole, userStoryId, sprintId }: TasksProviderProps,
+) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [userStories, setUserStories] = useState<UserStory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const canCreateTask = ["product_owner", "scrum_master", "developer"].includes(userRole);
+  const canCreateTask = ["product_owner", "scrum_master", "developer"].includes(
+    userRole,
+  );
 
   useEffect(() => {
     fetchTasksData();
@@ -151,23 +159,27 @@ export function TasksProvider({ children, projectId, userRole, userStoryId, spri
       }
 
       const [usersData, storiesData] = await Promise.all([
-        apiFetch<APIUserResponse[]>(`${API_BASE}/api/projects/${projectId}/members`),
-        apiFetch<APIUserStoryResponse[]>(`${API_BASE}/api/projects/${projectId}/userstories`),
+        apiFetch<APIUserResponse[]>(
+          `${API_BASE}/api/projects/${projectId}/members`,
+        ),
+        apiFetch<APIUserStoryResponse[]>(
+          `${API_BASE}/api/projects/${projectId}/userstories`,
+        ),
       ]);
 
       // Map API response to component format
       const mappedUsers = usersData.map((user: APIUserResponse) => ({
-        id: user.ID.toString(),
+        id: user.UserID.toString(),
         name: `${user.User.Nombre} ${user.User.ApellidoPaterno}`,
         email: user.User.Correo,
-        role: user.Role
+        role: user.Role,
       }));
 
       const mappedStories = storiesData.map((story: APIUserStoryResponse) => ({
         id: story.ID.toString(),
         title: story.Title,
         description: story.Description,
-        status: story.Status
+        status: story.Status,
       }));
 
       setUsers(mappedUsers);
@@ -180,12 +192,16 @@ export function TasksProvider({ children, projectId, userRole, userStoryId, spri
           id: task.ID.toString(),
           title: task.Title,
           description: task.Description,
-          status: (task.Status?.toLowerCase().replace("_", "-") || "todo") as Task["status"],
-          priority: (task.Priority?.toLowerCase() || "medium") as Task["priority"],
+          status:
+            (task.Status?.toLowerCase().replace("_", "-") || "todo") as Task[
+              "status"
+            ],
+          priority:
+            (task.Priority?.toLowerCase() || "medium") as Task["priority"],
           assigneeId: task.AssignedToID?.toString(),
           userStoryId: task.UserStoryID?.toString(),
           createdAt: task.CreatedAt,
-          updatedAt: task.UpdatedAt
+          updatedAt: task.UpdatedAt,
         }));
         setTasks(mappedTasks);
       } else {
@@ -193,13 +209,17 @@ export function TasksProvider({ children, projectId, userRole, userStoryId, spri
         const allTasks: Task[] = [];
         for (const story of mappedStories) {
           try {
-            const storyTasks = await apiFetch<APITaskResponse[]>(`${API_BASE}/api/userstories/${story.id}/tasks`);
+            const storyTasks = await apiFetch<APITaskResponse[]>(
+              `${API_BASE}/api/userstories/${story.id}/tasks`,
+            );
             const mappedTasks = storyTasks.map((task: APITaskResponse) => ({
               id: task.ID.toString(),
               title: task.Title,
               description: task.Description,
-              status: (task.Status?.toLowerCase().replace("_", "-") || "todo") as Task["status"],
-              priority: (task.Priority?.toLowerCase() || "medium") as Task["priority"],
+              status: (task.Status?.toLowerCase().replace("_", "-") ||
+                "todo") as Task["status"],
+              priority:
+                (task.Priority?.toLowerCase() || "medium") as Task["priority"],
               assigneeId: task.AssignedToID?.toString(),
               userStoryId: task.UserStoryID?.toString(),
               createdAt: task.CreatedAt,
@@ -219,30 +239,41 @@ export function TasksProvider({ children, projectId, userRole, userStoryId, spri
     }
   };
 
-  const createTask = async (taskData: Omit<Task, "id" | "createdAt" | "updatedAt">) => {
+  const createTask = async (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">,
+  ) => {
     if (!canCreateTask) {
       throw new Error("No tienes permisos para crear tareas");
     }
 
     // Tasks must be created within a user story
     if (!taskData.userStoryId) {
-      throw new Error("Las tareas deben estar asociadas a una historia de usuario");
+      throw new Error(
+        "Las tareas deben estar asociadas a una historia de usuario",
+      );
     }
 
     try {
-      const newTask = await apiFetch<APITaskResponse>(`${API_BASE}/api/userstories/${taskData.userStoryId}/tasks`, {
-        method: "POST",
-        body: JSON.stringify({
-          Title: taskData.title,
-          Description: taskData.description,
-        }),
-      });
-      setTasks(prev => [...prev, {
+      const newTask = await apiFetch<APITaskResponse>(
+        `${API_BASE}/api/userstories/${taskData.userStoryId}/tasks`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            Title: taskData.title,
+            Description: taskData.description,
+          }),
+        },
+      );
+      setTasks((prev) => [...prev, {
         id: newTask.ID.toString(),
         title: newTask.Title,
         description: newTask.Description,
-        status: (newTask.Status?.toLowerCase().replace("_", "-") || "todo") as Task["status"],
-        priority: (newTask.Priority?.toLowerCase() || "medium") as Task["priority"],
+        status:
+          (newTask.Status?.toLowerCase().replace("_", "-") || "todo") as Task[
+            "status"
+          ],
+        priority:
+          (newTask.Priority?.toLowerCase() || "medium") as Task["priority"],
         assigneeId: newTask.AssignedToID?.toString(),
         userStoryId: newTask.UserStoryID?.toString(),
         createdAt: newTask.CreatedAt,
@@ -250,7 +281,9 @@ export function TasksProvider({ children, projectId, userRole, userStoryId, spri
       }]);
     } catch (err) {
       console.error("Error al crear tarea:", err);
-      throw new Error(err instanceof Error ? err.message : "Error al crear la tarea");
+      throw new Error(
+        err instanceof Error ? err.message : "Error al crear la tarea",
+      );
     }
   };
 
@@ -260,58 +293,92 @@ export function TasksProvider({ children, projectId, userRole, userStoryId, spri
       if (updates.title) payload.Title = updates.title;
       if (updates.description) payload.Description = updates.description;
       if (updates.status) payload.Status = updates.status.replace("-", "_");
-      if (updates.priority) payload.Priority = updates.priority;
-      if (updates.assigneeId) payload.AssignedToID = Number(updates.assigneeId);
+      if (updates.assigneeId !== undefined) {
+        payload.AssignedToID = updates.assigneeId
+          ? Number(updates.assigneeId)
+          : null;
+      }
 
-      const updated = await apiFetch<APITaskResponse>(`${API_BASE}/api/tasks/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(payload),
-      });
+      const updated = await apiFetch<APITaskResponse>(
+        `${API_BASE}/api/tasks/${id}`,
+        {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        },
+      );
 
-      setTasks(prev => prev.map(task => task.id === id ? {
-        id: updated.ID.toString(),
-        title: updated.Title,
-        description: updated.Description,
-        status: (updated.Status?.toLowerCase().replace("_", "-") || "todo") as Task["status"],
-        priority: (updated.Priority?.toLowerCase() || "medium") as Task["priority"],
-        assigneeId: updated.AssignedToID?.toString(),
-        userStoryId: updated.UserStoryID?.toString(),
-        createdAt: updated.CreatedAt,
-        updatedAt: updated.UpdatedAt,
-      } : task));
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === id
+            ? {
+              id: updated.ID.toString(),
+              title: updated.Title,
+              description: updated.Description,
+              status: (updated.Status?.toLowerCase().replace("_", "-") ||
+                "todo") as Task["status"],
+              priority: (updated.Priority?.toLowerCase() || "medium") as Task[
+                "priority"
+              ],
+              assigneeId: updated.AssignedToID?.toString(),
+              userStoryId: updated.UserStoryID?.toString(),
+              createdAt: updated.CreatedAt,
+              updatedAt: updated.UpdatedAt,
+            }
+            : task
+        )
+      );
     } catch (err) {
-      throw new Error(err instanceof Error ? err.message : "Failed to update task");
+      throw new Error(
+        err instanceof Error ? err.message : "Failed to update task",
+      );
     }
   };
 
   const deleteTask = async (id: string) => {
     try {
       await apiFetch<void>(`${API_BASE}/api/tasks/${id}`, { method: "DELETE" });
-      setTasks(prev => prev.filter(task => task.id !== id));
+      setTasks((prev) => prev.filter((task) => task.id !== id));
     } catch (err) {
-      throw new Error(err instanceof Error ? err.message : "Failed to delete task");
+      throw new Error(
+        err instanceof Error ? err.message : "Failed to delete task",
+      );
     }
   };
 
   const assignTask = async (taskId: string, assigneeId: string) => {
     try {
-      const updated = await apiFetch<APITaskResponse>(`${API_BASE}/api/tasks/${taskId}/assign`, {
-        method: "PUT",
-        body: JSON.stringify({ userId: Number(assigneeId) }),
-      });
-      setTasks(prev => prev.map(task => task.id === taskId ? {
-        id: updated.ID.toString(),
-        title: updated.Title,
-        description: updated.Description,
-        status: (updated.Status?.toLowerCase().replace("_", "-") || "todo") as Task["status"],
-        priority: (updated.Priority?.toLowerCase() || "medium") as Task["priority"],
-        assigneeId: updated.AssignedToID?.toString(),
-        userStoryId: updated.UserStoryID?.toString(),
-        createdAt: updated.CreatedAt,
-        updatedAt: updated.UpdatedAt,
-      } : task));
+      const payload = { AssignedToID: assigneeId ? Number(assigneeId) : null };
+      const updated = await apiFetch<APITaskResponse>(
+        `${API_BASE}/api/tasks/${taskId}`,
+        {
+          method: "PUT",
+          body: JSON.stringify(payload),
+        },
+      );
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === taskId
+            ? {
+              id: updated.ID.toString(),
+              title: updated.Title,
+              description: updated.Description,
+              status: (updated.Status?.toLowerCase().replace("_", "-") ||
+                "todo") as Task["status"],
+              priority: (updated.Priority?.toLowerCase() || "medium") as Task[
+                "priority"
+              ],
+              assigneeId: updated.AssignedToID?.toString(),
+              userStoryId: updated.UserStoryID?.toString(),
+              createdAt: updated.CreatedAt,
+              updatedAt: updated.UpdatedAt,
+            }
+            : task
+        )
+      );
     } catch (err) {
-      throw new Error(err instanceof Error ? err.message : "Failed to assign task");
+      throw new Error(
+        err instanceof Error ? err.message : "Failed to assign task",
+      );
     }
   };
 
@@ -339,9 +406,14 @@ interface TaskFormProps {
   onCancel: () => void;
   users: User[];
   userStories: UserStory[];
+  initialData?: Partial<Task>;
+  isEdit?: boolean;
 }
 
-function TaskForm({ onSubmit, onCancel, users, userStories }: TaskFormProps) {
+function TaskForm(
+  { onSubmit, onCancel, users, userStories, initialData, isEdit }:
+    TaskFormProps,
+) {
   const [formData, setFormData] = useState<{
     title: string;
     description: string;
@@ -350,13 +422,26 @@ function TaskForm({ onSubmit, onCancel, users, userStories }: TaskFormProps) {
     assigneeId: string;
     userStoryId: string;
   }>({
-    title: "",
-    description: "",
-    status: "todo",
-    priority: "medium",
-    assigneeId: "",
-    userStoryId: "",
+    title: initialData?.title || "",
+    description: initialData?.description || "",
+    status: initialData?.status || "todo",
+    priority: initialData?.priority || "medium",
+    assigneeId: initialData?.assigneeId || "",
+    userStoryId: initialData?.userStoryId || "",
   });
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title || "",
+        description: initialData.description || "",
+        status: initialData.status || "todo",
+        priority: initialData.priority || "medium",
+        assigneeId: initialData.assigneeId || "",
+        userStoryId: initialData.userStoryId || "",
+      });
+    }
+  }, [initialData]);
 
   const handleSubmit = (e: Event) => {
     e.preventDefault();
@@ -364,38 +449,71 @@ function TaskForm({ onSubmit, onCancel, users, userStories }: TaskFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-      <h3 className="text-xl font-semibold text-center mb-6 text-gray-800 dark:text-white">Crear Nueva Tarea</h3>
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-md mx-auto bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md"
+    >
+      <h3 className="text-xl font-semibold text-center mb-6 text-gray-800 dark:text-white">
+        {isEdit ? "Editar Tarea" : "Crear Nueva Tarea"}
+      </h3>
 
       <div className="mb-4">
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Título:</label>
+        <label
+          htmlFor="title"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
+          Título:
+        </label>
         <input
           type="text"
           id="title"
           value={formData.title}
-          onChange={(e) => setFormData(prev => ({ ...prev, title: (e.target as HTMLInputElement).value }))}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              title: (e.target as HTMLInputElement).value,
+            }))}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
           required
         />
       </div>
 
       <div className="mb-4">
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción:</label>
+        <label
+          htmlFor="description"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
+          Descripción:
+        </label>
         <textarea
           id="description"
           value={formData.description}
-          onChange={(e) => setFormData(prev => ({ ...prev, description: (e.target as HTMLTextAreaElement).value }))}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              description: (e.target as HTMLTextAreaElement).value,
+            }))}
           rows={3}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-vertical"
         />
       </div>
 
       <div className="mb-4">
-        <label htmlFor="priority" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Prioridad:</label>
+        <label
+          htmlFor="priority"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
+          Prioridad:
+        </label>
         <select
           id="priority"
           value={formData.priority}
-          onChange={(e) => setFormData(prev => ({ ...prev, priority: (e.target as HTMLSelectElement).value as Task["priority"] }))}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              priority: (e.target as HTMLSelectElement)
+                .value as Task["priority"],
+            }))}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
         >
           <option value="low">Baja</option>
@@ -405,15 +523,24 @@ function TaskForm({ onSubmit, onCancel, users, userStories }: TaskFormProps) {
       </div>
 
       <div className="mb-4">
-        <label htmlFor="assignee" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Asignar a:</label>
+        <label
+          htmlFor="assignee"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
+          Asignar a:
+        </label>
         <select
           id="assignee"
           value={formData.assigneeId}
-          onChange={(e) => setFormData(prev => ({ ...prev, assigneeId: (e.target as HTMLSelectElement).value }))}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              assigneeId: (e.target as HTMLSelectElement).value,
+            }))}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
         >
           <option value="">Sin asignar</option>
-          {users.map(user => (
+          {users.map((user) => (
             <option key={user.id} value={user.id}>
               {user.name} ({user.role})
             </option>
@@ -422,15 +549,24 @@ function TaskForm({ onSubmit, onCancel, users, userStories }: TaskFormProps) {
       </div>
 
       <div className="mb-6">
-        <label htmlFor="userStory" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Historia de Usuario:</label>
+        <label
+          htmlFor="userStory"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+        >
+          Historia de Usuario:
+        </label>
         <select
           id="userStory"
           value={formData.userStoryId}
-          onChange={(e) => setFormData(prev => ({ ...prev, userStoryId: (e.target as HTMLSelectElement).value }))}
+          onChange={(e) =>
+            setFormData((prev) => ({
+              ...prev,
+              userStoryId: (e.target as HTMLSelectElement).value,
+            }))}
           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
         >
           <option value="">Sin Historia de Usuario</option>
-          {userStories.map(story => (
+          {userStories.map((story) => (
             <option key={story.id} value={story.id}>
               {story.title}
             </option>
@@ -439,8 +575,19 @@ function TaskForm({ onSubmit, onCancel, users, userStories }: TaskFormProps) {
       </div>
 
       <div className="flex justify-end gap-3">
-        <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">Crear Tarea</button>
-        <button type="button" onClick={onCancel} className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors">Cancelar</button>
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+        >
+          {isEdit ? "Actualizar Tarea" : "Crear Tarea"}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+        >
+          Cancelar
+        </button>
       </div>
     </form>
   );
@@ -455,31 +602,43 @@ interface TaskCardProps {
   canEdit: boolean;
 }
 
-function TaskCard({ task, onEdit, onDelete, onAssign, users, canEdit }: TaskCardProps) {
+function TaskCard(
+  { task, onEdit, onDelete, onAssign, users, canEdit }: TaskCardProps,
+) {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case "high": return "#ff4444";
-      case "medium": return "#ffaa00";
-      case "low": return "#00c851";
-      default: return "#666";
+      case "high":
+        return "#ff4444";
+      case "medium":
+        return "#ffaa00";
+      case "low":
+        return "#00c851";
+      default:
+        return "#666";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "done": return "#00c851";
-      case "in-progress": return "#ffbb33";
-      case "todo": return "#33b5e5";
-      default: return "#666";
+      case "done":
+        return "#00c851";
+      case "in-progress":
+        return "#ffbb33";
+      case "todo":
+        return "#33b5e5";
+      default:
+        return "#666";
     }
   };
 
-  const assignee = users.find(user => user.id === task.assigneeId);
+  const assignee = users.find((user) => user.id === task.assigneeId);
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
       <div className="flex justify-between items-start mb-3">
-        <h4 className="text-lg font-semibold text-gray-800 dark:text-white flex-1">{task.title}</h4>
+        <h4 className="text-lg font-semibold text-gray-800 dark:text-white flex-1">
+          {task.title}
+        </h4>
         <div className="flex gap-2">
           <span
             className="px-2 py-1 text-xs font-bold text-white rounded uppercase"
@@ -496,11 +655,15 @@ function TaskCard({ task, onEdit, onDelete, onAssign, users, canEdit }: TaskCard
         </div>
       </div>
 
-      <p className="text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">{task.description}</p>
+      <p className="text-gray-600 dark:text-gray-300 mb-3 leading-relaxed">
+        {task.description}
+      </p>
 
       {assignee && (
         <div className="text-sm text-gray-700 dark:text-gray-400 mb-3">
-          <strong className="font-medium">Asignado a:</strong> {assignee.name} ({assignee.role})
+          <strong className="font-medium">Asignado a:</strong> {assignee.name}
+          {" "}
+          ({assignee.role})
         </div>
       )}
 
@@ -525,12 +688,13 @@ function TaskCard({ task, onEdit, onDelete, onAssign, users, canEdit }: TaskCard
         )}
 
         <select
-          onChange={(e) => onAssign(task.id, (e.target as HTMLSelectElement).value)}
+          onChange={(e) =>
+            onAssign(task.id, (e.target as HTMLSelectElement).value)}
           value={task.assigneeId || ""}
           className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
         >
-          <option value="">Asignar a...</option>
-          {users.map(user => (
+          <option value="">Sin asignar</option>
+          {users.map((user) => (
             <option key={user.id} value={user.id}>
               {user.name}
             </option>
@@ -548,7 +712,14 @@ interface TasksManagementIslandProps {
   sprintId?: string;
 }
 
-export default function TasksManagementIsland({ projectId: _projectId, userRole, userStoryId: _userStoryId, sprintId: _sprintId }: TasksManagementIslandProps) {
+export default function TasksManagementIsland(
+  {
+    projectId: _projectId,
+    userRole,
+    userStoryId: _userStoryId,
+    sprintId: _sprintId,
+  }: TasksManagementIslandProps,
+) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [filter, setFilter] = useState({
@@ -569,10 +740,16 @@ export default function TasksManagementIsland({ projectId: _projectId, userRole,
     assignTask,
   } = useTasks();
 
-  const canCreateTask = ["product_owner", "scrum_master", "developer"].includes(userRole);
-  const canEditTask = ["product_owner", "scrum_master", "developer"].includes(userRole);
+  const canCreateTask = ["product_owner", "scrum_master", "developer"].includes(
+    userRole,
+  );
+  const canEditTask = ["product_owner", "scrum_master", "developer"].includes(
+    userRole,
+  );
 
-  const handleCreateTask = async (taskData: Omit<Task, "id" | "createdAt" | "updatedAt">) => {
+  const handleCreateTask = async (
+    taskData: Omit<Task, "id" | "createdAt" | "updatedAt">,
+  ) => {
     try {
       await createTask(taskData);
       setShowCreateForm(false);
@@ -586,7 +763,9 @@ export default function TasksManagementIsland({ projectId: _projectId, userRole,
       await updateTask(task.id, task);
       setEditingTask(null);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Error al actualizar la tarea");
+      alert(
+        err instanceof Error ? err.message : "Error al actualizar la tarea",
+      );
     }
   };
 
@@ -595,40 +774,54 @@ export default function TasksManagementIsland({ projectId: _projectId, userRole,
       try {
         await deleteTask(id);
       } catch (err) {
-        alert(err instanceof Error ? err.message : "Error al eliminar la tarea");
+        alert(
+          err instanceof Error ? err.message : "Error al eliminar la tarea",
+        );
       }
     }
   };
 
   const handleAssignTask = async (taskId: string, assigneeId: string) => {
-    if (assigneeId) {
-      try {
-        await assignTask(taskId, assigneeId);
-      } catch (err) {
-        alert(err instanceof Error ? err.message : "Error al asignar la tarea");
-      }
+    try {
+      await assignTask(taskId, assigneeId);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al asignar la tarea");
     }
   };
 
-  const filteredTasks = tasks.filter(task => {
+  const filteredTasks = tasks.filter((task) => {
     if (filter.status !== "all" && task.status !== filter.status) return false;
-    if (filter.priority !== "all" && task.priority !== filter.priority) return false;
-    if (filter.assignee !== "all" && task.assigneeId !== filter.assignee) return false;
+    if (filter.priority !== "all" && task.priority !== filter.priority) {
+      return false;
+    }
+    if (filter.assignee !== "all" && task.assigneeId !== filter.assignee) {
+      return false;
+    }
     return true;
   });
 
   if (loading) {
-    return <div className="text-center py-10 text-gray-600 dark:text-gray-400">Cargando tareas...</div>;
+    return (
+      <div className="text-center py-10 text-gray-600 dark:text-gray-400">
+        Cargando tareas...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center py-10 text-red-600 dark:text-red-400">Error: {error}</div>;
+    return (
+      <div className="text-center py-10 text-red-600 dark:text-red-400">
+        Error: {error}
+      </div>
+    );
   }
 
   return (
     <div className="max-w-7xl mx-auto p-6">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Gestión de Tareas</h2>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+          Gestión de Tareas
+        </h2>
         {canCreateTask && (
           <button
             type="button"
@@ -643,7 +836,11 @@ export default function TasksManagementIsland({ projectId: _projectId, userRole,
       <div className="flex gap-4 mb-6 flex-wrap">
         <select
           value={filter.status}
-          onChange={(e) => setFilter(prev => ({ ...prev, status: (e.target as HTMLSelectElement).value }))}
+          onChange={(e) =>
+            setFilter((prev) => ({
+              ...prev,
+              status: (e.target as HTMLSelectElement).value,
+            }))}
           className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">Todos los Estados</option>
@@ -654,7 +851,11 @@ export default function TasksManagementIsland({ projectId: _projectId, userRole,
 
         <select
           value={filter.priority}
-          onChange={(e) => setFilter(prev => ({ ...prev, priority: (e.target as HTMLSelectElement).value }))}
+          onChange={(e) =>
+            setFilter((prev) => ({
+              ...prev,
+              priority: (e.target as HTMLSelectElement).value,
+            }))}
           className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">Todas las Prioridades</option>
@@ -665,12 +866,16 @@ export default function TasksManagementIsland({ projectId: _projectId, userRole,
 
         <select
           value={filter.assignee}
-          onChange={(e) => setFilter(prev => ({ ...prev, assignee: (e.target as HTMLSelectElement).value }))}
+          onChange={(e) =>
+            setFilter((prev) => ({
+              ...prev,
+              assignee: (e.target as HTMLSelectElement).value,
+            }))}
           className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="all">Todos los Asignados</option>
           <option value="">Sin asignar</option>
-          {users.map(user => (
+          {users.map((user) => (
             <option key={user.id} value={user.id}>
               {user.name}
             </option>
@@ -679,21 +884,25 @@ export default function TasksManagementIsland({ projectId: _projectId, userRole,
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTasks.length === 0 ? (
-          <div className="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">No se encontraron tareas</div>
-        ) : (
-          filteredTasks.map(task => (
-            <TaskCard
-              key={task.id}
-              task={task}
-              onEdit={setEditingTask}
-              onDelete={handleDeleteTask}
-              onAssign={handleAssignTask}
-              users={users}
-              canEdit={canEditTask}
-            />
-          ))
-        )}
+        {filteredTasks.length === 0
+          ? (
+            <div className="col-span-full text-center py-10 text-gray-500 dark:text-gray-400">
+              No se encontraron tareas
+            </div>
+          )
+          : (
+            filteredTasks.map((task) => (
+              <TaskCard
+                key={`${task.id}-${task.assigneeId}-${task.updatedAt}`}
+                task={task}
+                onEdit={setEditingTask}
+                onDelete={handleDeleteTask}
+                onAssign={handleAssignTask}
+                users={users}
+                canEdit={canEditTask}
+              />
+            ))
+          )}
       </div>
 
       <Modal
@@ -706,6 +915,7 @@ export default function TasksManagementIsland({ projectId: _projectId, userRole,
           onCancel={() => setShowCreateForm(false)}
           users={users}
           userStories={userStories}
+          isEdit={false}
         />
       </Modal>
 
@@ -714,12 +924,17 @@ export default function TasksManagementIsland({ projectId: _projectId, userRole,
         maxWidth="md"
         onClose={() => setEditingTask(null)}
       >
-        <TaskForm
-          onSubmit={(data) => editingTask && handleUpdateTask({ ...editingTask, ...data })}
-          onCancel={() => setEditingTask(null)}
-          users={users}
-          userStories={userStories}
-        />
+        {editingTask && (
+          <TaskForm
+            onSubmit={(data) =>
+              editingTask && handleUpdateTask({ ...editingTask, ...data })}
+            onCancel={() => setEditingTask(null)}
+            users={users}
+            userStories={userStories}
+            initialData={editingTask}
+            isEdit
+          />
+        )}
       </Modal>
     </div>
   );

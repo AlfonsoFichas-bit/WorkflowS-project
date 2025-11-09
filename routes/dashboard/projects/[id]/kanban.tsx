@@ -19,11 +19,9 @@ export default define.page(function ProjectKanbanPage(req, _ctx) {
             <h1 class="text-2xl font-semibold">Tablero Kanban</h1>
             <span class="text-sm text-gray-600">Proyecto: #{projectId}</span>
           </div>
-          {projectId > 0 ? (
-            <KanbanBoardIsland projectId={projectId} />
-          ) : (
-            <div class="text-gray-600">ID de proyecto inválido</div>
-          )}
+          {projectId > 0
+            ? <KanbanBoardIsland projectId={projectId} />
+            : <div class="text-gray-600">ID de proyecto inválido</div>}
         </div>
       </DashboardLayout>
     </>

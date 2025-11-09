@@ -451,48 +451,48 @@ export default function SidebarIsland({
               </span>
             )}
           </a>
-<a
-              href="/dashboard/sprints"
-              data-spa-link
-              className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${
-                isCollapsed ? "justify-center px-1.5" : ""
+          <a
+            href="/dashboard/sprints"
+            data-spa-link
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${
+              isCollapsed ? "justify-center px-1.5" : ""
+            }`}
+            title={isCollapsed ? "Sprints" : undefined}
+          >
+            <MaterialSymbol
+              icon="timer"
+              className={`icon-md transition-all duration-300 ease-in-out ${
+                isCollapsed ? "icon-lg" : ""
               }`}
-              title={isCollapsed ? "Sprints" : undefined}
-            >
-              <MaterialSymbol
-                icon="timer"
-                className={`icon-md transition-all duration-300 ease-in-out ${
-                  isCollapsed ? "icon-lg" : ""
-                }`}
-                weight={500}
-              />
-              {!isCollapsed && (
-                <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
-                  Sprints
-                </span>
-              )}
-            </a>
-            <a
-              href="/dashboard/user-stories"
-              data-spa-link
-              className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${
-                isCollapsed ? "justify-center px-1.5" : ""
+              weight={500}
+            />
+            {!isCollapsed && (
+              <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
+                Sprints
+              </span>
+            )}
+          </a>
+          <a
+            href="/dashboard/user-stories"
+            data-spa-link
+            className={`flex items-center gap-3 rounded-md p-1.5 text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-300 ease-in-out ${
+              isCollapsed ? "justify-center px-1.5" : ""
+            }`}
+            title={isCollapsed ? "User Stories" : undefined}
+          >
+            <MaterialSymbol
+              icon="book"
+              className={`icon-md transition-all duration-300 ease-in-out ${
+                isCollapsed ? "icon-lg" : ""
               }`}
-              title={isCollapsed ? "User Stories" : undefined}
-            >
-              <MaterialSymbol
-                icon="book"
-                className={`icon-md transition-all duration-300 ease-in-out ${
-                  isCollapsed ? "icon-lg" : ""
-                }`}
-                weight={500}
-              />
-              {!isCollapsed && (
-                <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
-                  User Stories
-                </span>
-              )}
-            </a>
+              weight={500}
+            />
+            {!isCollapsed && (
+              <span className="transition-opacity duration-300 ease-in-out whitespace-nowrap overflow-hidden">
+                User Stories
+              </span>
+            )}
+          </a>
           <a
             href="/dashboard/users"
             data-spa-link
