@@ -57,6 +57,57 @@ export interface UserStory {
   status: string;
 }
 
+export interface Comment {
+  ID: number;
+  TaskID: number;
+  AuthorID: number;
+  Content: string;
+  CreatedAt: string;
+  UpdatedAt: string;
+  Author: {
+    ID: number;
+    Nombre: string;
+    ApellidoPaterno: string;
+    ApellidoMaterno: string;
+    Correo: string;
+  };
+}
+
+export interface Evaluator {
+  ID: number;
+  Nombre: string;
+  ApellidoPaterno: string;
+  ApellidoMaterno: string;
+  Correo: string;
+  Role: string;
+}
+
+export interface Rubric {
+  ID: number;
+  Name: string;
+  Description: string;
+}
+
+export interface CriterionEvaluation {
+  ID: number;
+  CriterionID: number;
+  Score: number;
+  Feedback: string;
+}
+
+export interface Evaluation {
+  ID: number;
+  TaskID: number;
+  EvaluatorID: number;
+  RubricID: number;
+  OverallFeedback: string;
+  TotalScore: number;
+  Status: string;
+  Evaluator: Evaluator;
+  Rubric: Rubric;
+  CriterionEvaluations: CriterionEvaluation[];
+}
+
 // API Response types
 interface APIUserResponse {
   ID: number;
@@ -598,12 +649,16 @@ interface TaskCardProps {
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
   onAssign: (taskId: string, assigneeId: string) => void;
+  onShowComments: (taskId: string) => void;
+  onEvaluate: (taskId: string) => void;
+  onShowEvaluations: (taskId: string) => void;
   users: User[];
   canEdit: boolean;
+  userRole: string;
 }
 
 function TaskCard(
-  { task, onEdit, onDelete, onAssign, users, canEdit }: TaskCardProps,
+  { task, onEdit, onDelete, onAssign, onShowComments, onEvaluate, onShowEvaluations, users, canEdit, userRole }: TaskCardProps,
 ) {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
@@ -667,40 +722,64 @@ function TaskCard(
         </div>
       )}
 
-      <div className="flex gap-2 items-center">
-        {canEdit && (
-          <>
-            <button
-              type="button"
-              onClick={() => onEdit(task)}
-              className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
-            >
-              Editar
-            </button>
-            <button
-              type="button"
-              onClick={() => onDelete(task.id)}
-              className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-            >
-              Eliminar
-            </button>
-          </>
-        )}
+       <div className="flex gap-2 items-center flex-wrap">
+         {canEdit && (
+           <>
+             <button
+               type="button"
+               onClick={() => onEdit(task)}
+               className="px-3 py-1 text-sm bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors"
+             >
+               Editar
+             </button>
+             <button
+               type="button"
+               onClick={() => onDelete(task.id)}
+               className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+             >
+               Eliminar
+             </button>
+           </>
+         )}
 
-        <select
-          onChange={(e) =>
-            onAssign(task.id, (e.target as HTMLSelectElement).value)}
-          value={task.assigneeId || ""}
-          className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-        >
-          <option value="">Sin asignar</option>
-          {users.map((user) => (
-            <option key={user.id} value={user.id}>
-              {user.name}
-            </option>
-          ))}
-        </select>
-      </div>
+         <button
+           type="button"
+           onClick={() => onShowComments(task.id)}
+           className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+         >
+           Comentarios
+         </button>
+         <button
+           type="button"
+           onClick={() => onShowEvaluations(task.id)}
+           className="px-3 py-1 text-sm bg-indigo-500 text-white rounded hover:bg-indigo-600 transition-colors"
+         >
+           Ver Evaluaciones
+         </button>
+         {userRole === "docente" && (
+           <button
+             type="button"
+             onClick={() => onEvaluate(task.id)}
+             className="px-3 py-1 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors"
+           >
+             Evaluar
+           </button>
+         )}
+
+         <select
+           onChange={(e) =>
+             onAssign(task.id, (e.target as HTMLSelectElement).value)}
+           value={task.assigneeId || ""}
+           className="px-2 py-1 text-sm border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+         >
+           <option value="">Sin asignar</option>
+           {users.map((user) => (
+             <option key={user.id} value={user.id}>
+               {user.name}
+             </option>
+           ))}
+         </select>
+       </div>
     </div>
   );
 }
@@ -722,6 +801,25 @@ export default function TasksManagementIsland(
 ) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [commentsModal, setCommentsModal] = useState<{
+    show: boolean;
+    taskId: string;
+    comments: Comment[];
+    loading: boolean;
+  }>({ show: false, taskId: "", comments: [], loading: false });
+  const [evaluationModal, setEvaluationModal] = useState<{
+    show: boolean;
+    taskId: string;
+    rubricId: string;
+    overallFeedback: string;
+    loading: boolean;
+  }>({ show: false, taskId: "", rubricId: "", overallFeedback: "", loading: false });
+  const [evaluationsModal, setEvaluationsModal] = useState<{
+    show: boolean;
+    taskId: string;
+    evaluations: Evaluation[];
+    loading: boolean;
+  }>({ show: false, taskId: "", evaluations: [], loading: false });
   const [filter, setFilter] = useState({
     status: "all",
     priority: "all",
@@ -786,6 +884,52 @@ export default function TasksManagementIsland(
       await assignTask(taskId, assigneeId);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Error al asignar la tarea");
+    }
+  };
+
+  const handleShowComments = async (taskId: string) => {
+    setCommentsModal({ show: true, taskId, comments: [], loading: true });
+    try {
+      const comments = await apiFetch<Comment[]>(`${API_BASE}/api/tasks/${taskId}/comments`);
+      setCommentsModal({ show: true, taskId, comments, loading: false });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al cargar comentarios");
+      setCommentsModal({ show: false, taskId: "", comments: [], loading: false });
+    }
+  };
+
+  const handleCreateEvaluation = async () => {
+    if (!evaluationModal.taskId || !evaluationModal.overallFeedback) {
+      alert("Por favor completa todos los campos");
+      return;
+    }
+
+    setEvaluationModal(prev => ({ ...prev, loading: true }));
+    try {
+      await apiFetch(`${API_BASE}/api/tasks/${evaluationModal.taskId}/evaluations`, {
+        method: "POST",
+        body: JSON.stringify({
+          rubricId: parseInt(evaluationModal.rubricId) || 1,
+          overallFeedback: evaluationModal.overallFeedback,
+          criterionEvaluations: [] // Simplificado
+        })
+      });
+      alert("Evaluación creada exitosamente");
+      setEvaluationModal({ show: false, taskId: "", rubricId: "", overallFeedback: "", loading: false });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al crear evaluación");
+      setEvaluationModal(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const handleShowEvaluations = async (taskId: string) => {
+    setEvaluationsModal({ show: true, taskId, evaluations: [], loading: true });
+    try {
+      const evaluations = await apiFetch<Evaluation[]>(`${API_BASE}/api/tasks/${taskId}/evaluations`);
+      setEvaluationsModal({ show: true, taskId, evaluations, loading: false });
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Error al cargar evaluaciones");
+      setEvaluationsModal({ show: false, taskId: "", evaluations: [], loading: false });
     }
   };
 
@@ -898,8 +1042,12 @@ export default function TasksManagementIsland(
                 onEdit={setEditingTask}
                 onDelete={handleDeleteTask}
                 onAssign={handleAssignTask}
+                onShowComments={handleShowComments}
+                onEvaluate={(taskId) => setEvaluationModal({ show: true, taskId, rubricId: "1", overallFeedback: "", loading: false })}
+                onShowEvaluations={handleShowEvaluations}
                 users={users}
                 canEdit={canEditTask}
+                userRole={userRole}
               />
             ))
           )}
@@ -935,6 +1083,140 @@ export default function TasksManagementIsland(
             isEdit
           />
         )}
+      </Modal>
+
+      <Modal
+        show={commentsModal.show}
+        maxWidth="md"
+        onClose={() => setCommentsModal({ show: false, taskId: "", comments: [], loading: false })}
+      >
+        <div className="p-6">
+          <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+            Comentarios de la Tarea
+          </h3>
+          {commentsModal.loading ? (
+            <div className="text-center py-4 text-gray-600 dark:text-gray-400">
+              Cargando comentarios...
+            </div>
+          ) : commentsModal.comments.length === 0 ? (
+            <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+              No hay comentarios para esta tarea.
+            </div>
+          ) : (
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {commentsModal.comments.map((comment) => (
+                <div key={comment.ID} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-medium text-gray-800 dark:text-white">
+                      {comment.Author.Nombre} {comment.Author.ApellidoPaterno}
+                    </span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(comment.CreatedAt).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300">{comment.Content}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      <Modal
+        show={evaluationModal.show}
+        maxWidth="md"
+        onClose={() => setEvaluationModal({ show: false, taskId: "", rubricId: "", overallFeedback: "", loading: false })}
+      >
+        <div className="p-6">
+          <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+            Crear Evaluación de Tarea
+          </h3>
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                ID de Rúbrica
+              </label>
+              <input
+                type="text"
+                value={evaluationModal.rubricId}
+                onChange={(e) => setEvaluationModal(prev => ({ ...prev, rubricId: (e.target as HTMLInputElement).value }))}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                placeholder="1"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                Retroalimentación General
+              </label>
+              <textarea
+                value={evaluationModal.overallFeedback}
+                onChange={(e) => setEvaluationModal(prev => ({ ...prev, overallFeedback: (e.target as HTMLTextAreaElement).value }))}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white resize-vertical"
+                placeholder="Escribe tu retroalimentación..."
+              />
+            </div>
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setEvaluationModal({ show: false, taskId: "", rubricId: "", overallFeedback: "", loading: false })}
+                className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={handleCreateEvaluation}
+                disabled={evaluationModal.loading}
+                className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors disabled:opacity-50"
+              >
+                {evaluationModal.loading ? "Creando..." : "Crear Evaluación"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        show={evaluationsModal.show}
+        maxWidth="md"
+        onClose={() => setEvaluationsModal({ show: false, taskId: "", evaluations: [], loading: false })}
+      >
+        <div className="p-6">
+          <h3 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
+            Evaluaciones de la Tarea
+          </h3>
+          {evaluationsModal.loading ? (
+            <div className="text-center py-4 text-gray-600 dark:text-gray-400">
+              Cargando evaluaciones...
+            </div>
+          ) : evaluationsModal.evaluations.length === 0 ? (
+            <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+              No hay evaluaciones para esta tarea.
+            </div>
+          ) : (
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {evaluationsModal.evaluations.map((evaluation) => (
+                <div key={evaluation.ID} className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="font-medium text-gray-800 dark:text-white">
+                      Evaluador: {evaluation.Evaluator?.Nombre} {evaluation.Evaluator?.ApellidoPaterno}
+                    </span>
+                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                      Puntaje Total: {evaluation.TotalScore}
+                    </span>
+                  </div>
+                  <p className="text-gray-700 dark:text-gray-300 mb-2">
+                    <strong>Retroalimentación:</strong> {evaluation.OverallFeedback}
+                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Estado: {evaluation.Status}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </Modal>
     </div>
   );

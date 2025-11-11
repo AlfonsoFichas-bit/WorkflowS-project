@@ -39,6 +39,14 @@ interface Sprint {
   UpdatedAt: string;
 }
 
+interface CommitmentReport {
+  sprintId: number;
+  sprintName: string;
+  committedPoints: number;
+  completedPoints: number;
+  completionRate: number;
+}
+
 export default function SprintManagementIsland() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -50,6 +58,8 @@ export default function SprintManagementIsland() {
   const [itemsPerPage] = useState(5);
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportData, setReportData] = useState<CommitmentReport | null>(null);
   const [editingSprint, setEditingSprint] = useState<Sprint | null>(null);
   const [userRole, setUserRole] = useState<string>("");
   const [name, setName] = useState("");
@@ -250,6 +260,37 @@ export default function SprintManagementIsland() {
       } else {
         const errorData = await response.json();
         setMessage(errorData.error || "Error al eliminar sprint");
+      }
+    } catch (_err) {
+      setMessage("Error de conexión");
+    }
+  };
+
+  const handleViewReport = async (sprint: Sprint) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setMessage("No autenticado");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/sprints/${sprint.ID}/reports/commitment`,
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (response.ok) {
+        const report = await response.json();
+        setReportData(report);
+        setShowReportModal(true);
+      } else {
+        const errorData = await response.json();
+        setMessage(errorData.error || "Error al cargar el reporte");
       }
     } catch (_err) {
       setMessage("Error de conexión");
@@ -638,6 +679,64 @@ export default function SprintManagementIsland() {
         </div>
       </Modal>
 
+      <Modal
+        show={showReportModal}
+        maxWidth="md"
+        closeable
+        onClose={() => setShowReportModal(false)}
+      >
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+            Reporte de Compromiso del Sprint
+          </h2>
+          {reportData ? (
+            <div class="space-y-4">
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
+                <h3 class="text-lg font-medium text-gray-800 dark:text-gray-200 mb-2">
+                  {reportData.sprintName}
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      Puntos Comprometidos
+                    </p>
+                    <p class="text-2xl font-bold text-blue-600">
+                      {reportData.committedPoints}
+                    </p>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      Puntos Completados
+                    </p>
+                    <p class="text-2xl font-bold text-green-600">
+                      {reportData.completedPoints}
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <p class="text-sm text-gray-600 dark:text-gray-400">
+                    Tasa de Completación
+                  </p>
+                  <div class="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-4 mt-2">
+                    <div
+                      class="bg-green-600 h-4 rounded-full"
+                      style={`width: ${reportData.completionRate}%`}
+                    ></div>
+                  </div>
+                  <p class="text-lg font-semibold text-center mt-2">
+                    {reportData.completionRate.toFixed(1)}%
+                  </p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div class="text-center py-4 text-gray-500 dark:text-gray-400">
+              Cargando reporte...
+            </div>
+          )}
+        </div>
+      </Modal>
+
       {selectedProject && (
         <div class="mt-6">
           <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
@@ -709,24 +808,32 @@ export default function SprintManagementIsland() {
                         </p>
                       </div>
                     </div>
-                    <div class="flex justify-end space-x-2">
-                      <button
-                        type="button"
-                        class="text-blue-600 hover:text-blue-800"
-                        onClick={() => handleEditSprint(sprint)}
-                        title="Editar"
-                      >
-                        <MaterialSymbol icon="edit" className="icon-md" />
-                      </button>
-                      <button
-                        type="button"
-                        class="text-red-600 hover:text-red-800"
-                        onClick={() => handleDeleteSprint(sprint.ID)}
-                        title="Eliminar"
-                      >
-                        <MaterialSymbol icon="delete" className="icon-md" />
-                      </button>
-                    </div>
+                     <div class="flex justify-end space-x-2">
+                       <button
+                         type="button"
+                         class="text-green-600 hover:text-green-800"
+                         onClick={() => handleViewReport(sprint)}
+                         title="Ver Reporte de Compromiso"
+                       >
+                         <MaterialSymbol icon="analytics" className="icon-md" />
+                       </button>
+                       <button
+                         type="button"
+                         class="text-blue-600 hover:text-blue-800"
+                         onClick={() => handleEditSprint(sprint)}
+                         title="Editar"
+                       >
+                         <MaterialSymbol icon="edit" className="icon-md" />
+                       </button>
+                       <button
+                         type="button"
+                         class="text-red-600 hover:text-red-800"
+                         onClick={() => handleDeleteSprint(sprint.ID)}
+                         title="Eliminar"
+                       >
+                         <MaterialSymbol icon="delete" className="icon-md" />
+                       </button>
+                     </div>
                   </div>
                 ))
               )}
